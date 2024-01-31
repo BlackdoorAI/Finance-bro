@@ -1,2 +1,0 @@
-# StockStat
-STOCKSTAT
