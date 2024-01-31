@@ -1,0 +1,71 @@
+Path to info: Stock["facts"]["us-gaap"][some_measure]["units"]["USD"]
+
+Path to meta info: Stock["facts"]["dei"][some_meausere]
+
+List of all possible names for shares outstanding:
+    CommonStockSharesOutstanding
+    EntityCommonStockSharesOutstanding
+
+Decide if to ping individual concepts instead of getting all the data
+Alternative is storing all the files in harddisk instead of memory
+    The Current strategy is to store the data using pickle and reload it for analysis
+
+Three things:
+    First:
+        Graph and correlate measures and ratios
+            Currently forward filling fundamentals data, could be fucked in the future
+            Include the rate of change of the variables and compare those 
+    Second:
+        Make a test to validate trading strategies
+            Add a function that picks eligible stocks at some timeframe and test their performance xdz
+    Third:
+        Train a model to predict the long term price
+            forward filling fundamentals can be really fucked 
+            Consider using averages or linear change from previous value to next for training 
+            Include all the past fundamentals for each datapoint - this could figure out how people value growth.
+
+Data to add for regression and AI:
+    oil price
+    interest rates 
+        FRED HAS SO MUCH DATA HOLY SHIT 
+        pick yer fucking poison mate
+    
+
+Measures:
+    Price/BookValuepershare = MarketCap/BookValue = EntityCommonStockSharesOutstanding*SPrice(Assets-Liabilities)
+    Price/Earnings - all the possible earnings metrics
+    Current ratio = AssetsCurrent/LiabilitiesCurrent
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Revenue
+    Operating Income 
+    Free cash flow 
+    EBITDA 
+    Dividends - "PaymentsOfDividendsCommonStock"
+
+How does market cap influence these correlations?
+
+Where do you find price data?
+    Yahoo-fin.
+
+
+Methods to figure out relationships:
+    Kendall's Tau
+    Spearman's Rank Correlation
+
+    cross variable correlation loop through all variables 
+    Polynomial regression
+    LSTM
+
+Always use a list for searchdict, not single string!!!!!
+
+Todo:
+    Maybe split the price part into a second async price_init
+        async is fucking up again
+
+    Make a filler function to get data that wasnt available ! NOW 
+
+    Implement additive logic for unavailable measures
+
+    Figure out how much of the data was unsuccessful or missing
+        maybe add a counter if you can
+    
