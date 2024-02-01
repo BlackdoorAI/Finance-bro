@@ -56,16 +56,17 @@ Methods to figure out relationships:
     Polynomial regression
     LSTM
 
-Always use a list for searchdict, not single string!!!!!
+Alternatively you can use the frames api to get the data if it all goes to hell
 
 Todo:
     Maybe split the price part into a second async price_init
         async is fucking up again
 
-    Make a filler function to get data that wasnt available ! NOW 
+    Implement replacement logic 
+        if not enough try additive, but its fucked 
 
-    Implement additive logic for unavailable measures
+    Shares is now identical to fact, you can join them together
 
-    Figure out how much of the data was unsuccessful or missing
-        maybe add a counter if you can
-    
+    Sleeps are clogging up the semaphore
+
+    Define behaviour for 404s with cik numbers
