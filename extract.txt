@@ -57,6 +57,7 @@ Methods to figure out relationships:
     LSTM
 
 Alternatively you can use the frames api to get the data if it all goes to hell
+I am not fucking dealing with danish kroner.
 
 Todo:
     Maybe split the price part into a second async price_init
@@ -64,9 +65,6 @@ Todo:
 
     Implement replacement logic 
         if not enough try additive, but its fucked 
-
-    Shares is now identical to fact, you can join them together
+        you are really going to have to use additive, goddamit 
 
     Sleeps are clogging up the semaphore
-
-    Define behaviour for 404s with cik numbers

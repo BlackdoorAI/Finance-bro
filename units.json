@@ -1,0 +1,1627 @@
+{
+ "EntityCommonStockSharesOutstanding": [
+  "shares"
+ ],
+ "EntityListingParValuePerShare": [
+  "USD/shares"
+ ],
+ "EntityPublicFloat": [
+  "USD"
+ ],
+ "AccountsPayableCurrent": [
+  "USD"
+ ],
+ "AccountsReceivableNet": [
+  "USD"
+ ],
+ "AccountsReceivableNetCurrent": [
+  "USD"
+ ],
+ "AccountsReceivableNetNoncurrent": [
+  "USD"
+ ],
+ "AccruedIncomeTaxesCurrent": [
+  "USD"
+ ],
+ "AccruedIncomeTaxesNoncurrent": [
+  "USD"
+ ],
+ "AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment": [
+  "USD"
+ ],
+ "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax": [
+  "USD"
+ ],
+ "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax": [
+  "USD"
+ ],
+ "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax": [
+  "USD"
+ ],
+ "AccumulatedOtherComprehensiveIncomeLossNetOfTax": [
+  "USD"
+ ],
+ "AcquiredFiniteLivedIntangibleAssetAmount": [
+  "USD"
+ ],
+ "AcquiredFiniteLivedIntangibleAssetWeightedAverageUsefulLife": [
+  "Year"
+ ],
+ "AdvertisingExpense": [
+  "USD"
+ ],
+ "AllocatedShareBasedCompensationExpense": [
+  "USD"
+ ],
+ "AllowanceForDoubtfulAccountsReceivableCurrent": [
+  "USD"
+ ],
+ "AmortizationOfIntangibleAssets": [
+  "USD"
+ ],
+ "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount": [
+  "shares"
+ ],
+ "AssetImpairmentCharges": [
+  "USD"
+ ],
+ "Assets": [
+  "USD"
+ ],
+ "AssetsCurrent": [
+  "USD"
+ ],
+ "AssetsFairValueDisclosureRecurring": [
+  "USD"
+ ],
+ "AvailableForSaleDebtSecuritiesAmortizedCostBasis": [
+  "USD"
+ ],
+ "AvailableForSaleSecurities": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainBeforeTax": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedLossBeforeTax": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesAmortizedCost": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAccumulatedLoss": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThanTwelveMonthsFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTwelveMonthsOrLongerFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesCurrent": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsAmortizedCost": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsAmortizedCost": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsAmortizedCost": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesAmortizedCost": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsAmortizedCostBasis": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenAmortizedCostBasis": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenAmortizedCostBasis": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveAmortizedCostBasis": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearAmortizedCost": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesDebtSecurities": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesGrossRealizedGains": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesGrossRealizedLosses": [
+  "USD"
+ ],
+ "AvailableForSaleSecuritiesGrossUnrealizedLosses1": [
+  "USD"
+ ],
+ "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses1": [
+  "USD"
+ ],
+ "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses2": [
+  "USD"
+ ],
+ "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses1": [
+  "USD"
+ ],
+ "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses2": [
+  "USD"
+ ],
+ "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses1": [
+  "USD"
+ ],
+ "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses2": [
+  "USD"
+ ],
+ "AvailableforsaleSecuritiesGrossUnrealizedGain": [
+  "USD"
+ ],
+ "BuildingsAndImprovementsGross": [
+  "USD"
+ ],
+ "BusinessAcquisitionCostOfAcquiredEntityCashPaid": [
+  "USD"
+ ],
+ "BusinessAcquisitionProFormaEarningsPerShareDiluted": [
+  "USD/shares"
+ ],
+ "BusinessAcquisitionsProFormaNetIncomeLoss": [
+  "USD"
+ ],
+ "BusinessAcquisitionsProFormaRevenue": [
+  "USD"
+ ],
+ "BusinessCombinationIntegrationRelatedCosts": [
+  "USD"
+ ],
+ "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles": [
+  "USD"
+ ],
+ "CapitalizedComputerSoftwareAmortization": [
+  "USD"
+ ],
+ "CapitalizedComputerSoftwareAmortization1": [
+  "USD"
+ ],
+ "CapitalLeasedAssetsGross": [
+  "USD"
+ ],
+ "CapitalLeaseObligationsIncurred": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsDue": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsDueCurrent": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsDueInFiveYears": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsDueInFourYears": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsDueInThreeYears": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsDueInTwoYears": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsDueThereafter": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsInterestIncludedInPayments": [
+  "USD"
+ ],
+ "CapitalLeasesFutureMinimumPaymentsRemainderOfFiscalYear": [
+  "USD"
+ ],
+ "CapitalLeasesLesseeBalanceSheetAssetsByMajorClassAccumulatedDeprecation": [
+  "USD"
+ ],
+ "CashAndCashEquivalentsAtCarryingValue": [
+  "USD"
+ ],
+ "CashAndCashEquivalentsPeriodIncreaseDecrease": [
+  "USD"
+ ],
+ "CashCashEquivalentsAndShortTermInvestments": [
+  "USD"
+ ],
+ "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": [
+  "USD"
+ ],
+ "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect": [
+  "USD"
+ ],
+ "CommercialPaper": [
+  "USD"
+ ],
+ "CommonStockDividendsPerShareDeclared": [
+  "USD/shares"
+ ],
+ "CommonStockIncludingAdditionalPaidInCapital": [
+  "USD"
+ ],
+ "CommonStockSharesAuthorized": [
+  "shares"
+ ],
+ "CommonStockSharesOutstanding": [
+  "shares"
+ ],
+ "CommonStocksIncludingAdditionalPaidInCapital": [
+  "USD"
+ ],
+ "ComprehensiveIncomeNetOfTax": [
+  "USD"
+ ],
+ "ContractWithCustomerLiability": [
+  "USD"
+ ],
+ "ContractWithCustomerLiabilityCurrent": [
+  "USD"
+ ],
+ "ContractWithCustomerLiabilityNoncurrent": [
+  "USD"
+ ],
+ "ContractWithCustomerLiabilityRevenueRecognized": [
+  "USD"
+ ],
+ "ConvertibleDebtCurrent": [
+  "USD"
+ ],
+ "CostMethodInvestments": [
+  "USD"
+ ],
+ "CostOfGoodsAndServicesSold": [
+  "USD"
+ ],
+ "CostOfGoodsSold": [
+  "USD"
+ ],
+ "CostOfRevenue": [
+  "USD"
+ ],
+ "CostsAndExpenses": [
+  "USD"
+ ],
+ "CumulativeEffectOfInitialAdoptionOfFIN48": [
+  "USD"
+ ],
+ "CumulativeEffectOfInitialAdoptionOfNewAccountingPrinciple": [
+  "USD"
+ ],
+ "CurrentFederalTaxExpenseBenefit": [
+  "USD"
+ ],
+ "CurrentForeignTaxExpenseBenefit": [
+  "USD"
+ ],
+ "CurrentIncomeTaxExpenseBenefit": [
+  "USD"
+ ],
+ "CurrentStateAndLocalTaxExpenseBenefit": [
+  "USD"
+ ],
+ "DebtInstrumentCarryingAmount": [
+  "USD"
+ ],
+ "DebtInstrumentFaceAmount": [
+  "EUR",
+  "USD"
+ ],
+ "DebtInstrumentPrincipalOutstanding": [
+  "USD"
+ ],
+ "DebtInstrumentUnamortizedDiscount": [
+  "USD"
+ ],
+ "DebtInstrumentUnamortizedDiscountPremiumAndDebtIssuanceCostsNet": [
+  "USD"
+ ],
+ "DebtLongtermAndShorttermCombinedAmount": [
+  "USD"
+ ],
+ "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLonger": [
+  "USD"
+ ],
+ "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss": [
+  "USD"
+ ],
+ "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12Months": [
+  "USD"
+ ],
+ "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss": [
+  "USD"
+ ],
+ "DebtSecuritiesAvailableForSaleRealizedGain": [
+  "USD"
+ ],
+ "DebtSecuritiesAvailableForSaleRealizedLoss": [
+  "USD"
+ ],
+ "DebtSecuritiesAvailableForSaleUnrealizedLossPosition": [
+  "USD"
+ ],
+ "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss": [
+  "USD"
+ ],
+ "DeferredFederalIncomeTaxExpenseBenefit": [
+  "USD"
+ ],
+ "DeferredFederalStateAndLocalTaxExpenseBenefit": [
+  "USD"
+ ],
+ "DeferredForeignIncomeTaxExpenseBenefit": [
+  "USD"
+ ],
+ "DeferredIncomeTaxExpenseBenefit": [
+  "USD"
+ ],
+ "DeferredIncomeTaxesAndTaxCredits": [
+  "USD"
+ ],
+ "DeferredIncomeTaxLiabilities": [
+  "USD"
+ ],
+ "DeferredIncomeTaxLiabilitiesNet": [
+  "USD"
+ ],
+ "DeferredRevenue": [
+  "USD"
+ ],
+ "DeferredRevenueAdditions": [
+  "USD"
+ ],
+ "DeferredRevenueCurrent": [
+  "USD"
+ ],
+ "DeferredRevenueNoncurrent": [
+  "USD"
+ ],
+ "DeferredRevenueRevenueRecognized": [
+  "USD"
+ ],
+ "DeferredRevenueRevenueRecognized1": [
+  "USD"
+ ],
+ "DeferredStateAndLocalIncomeTaxExpenseBenefit": [
+  "USD"
+ ],
+ "DeferredTaxAssetsCapitalLossCarryforwards": [
+  "USD"
+ ],
+ "DeferredTaxAssetsDeferredIncome": [
+  "USD"
+ ],
+ "DeferredTaxAssetsGross": [
+  "USD"
+ ],
+ "DeferredTaxAssetsLiabilitiesNet": [
+  "USD"
+ ],
+ "DeferredTaxAssetsLiabilitiesNetCurrent": [
+  "USD"
+ ],
+ "DeferredTaxAssetsLiabilitiesNetNoncurrent": [
+  "USD"
+ ],
+ "DeferredTaxAssetsNet": [
+  "USD"
+ ],
+ "DeferredTaxAssetsNetCurrent": [
+  "USD"
+ ],
+ "DeferredTaxAssetsNetNoncurrent": [
+  "USD"
+ ],
+ "DeferredTaxAssetsOperatingLossCarryforwards": [
+  "USD"
+ ],
+ "DeferredTaxAssetsOther": [
+  "USD"
+ ],
+ "DeferredTaxAssetsTaxDeferredExpenseCompensationAndBenefitsShareBasedCompensationCost": [
+  "USD"
+ ],
+ "DeferredTaxAssetsTaxDeferredExpenseOther": [
+  "USD"
+ ],
+ "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccrualsImpairmentLosses": [
+  "USD"
+ ],
+ "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccrualsOther": [
+  "USD"
+ ],
+ "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccrualsRestructuringCharges": [
+  "USD"
+ ],
+ "DeferredTaxAssetsValuationAllowance": [
+  "USD"
+ ],
+ "DeferredTaxLiabilities": [
+  "USD"
+ ],
+ "DeferredTaxLiabilitiesLeasingArrangements": [
+  "USD"
+ ],
+ "DeferredTaxLiabilitiesNoncurrent": [
+  "USD"
+ ],
+ "DeferredTaxLiabilitiesOther": [
+  "USD"
+ ],
+ "DeferredTaxLiabilitiesOtherComprehensiveIncome": [
+  "USD"
+ ],
+ "DeferredTaxLiabilitiesTaxDeferredIncome": [
+  "USD"
+ ],
+ "DeferredTaxLiabilitiesUndistributedForeignEarnings": [
+  "USD"
+ ],
+ "DeferredTaxLiabilityNotRecognizedAmountOfUnrecognizedDeferredTaxLiability": [
+  "USD"
+ ],
+ "DeferredTaxLiabilityNotRecognizedAmountOfUnrecognizedDeferredTaxLiabilityUndistributedEarningsOfForeignSubsidiaries": [
+  "USD"
+ ],
+ "DeferredTaxLiabilityNotRecognizedCumulativeAmountOfTemporaryDifference": [
+  "USD"
+ ],
+ "DefinedContributionPlanCostRecognized": [
+  "USD"
+ ],
+ "DefinedContributionPlanEmployerMatchingContributionPercentOfMatch": [
+  "pure"
+ ],
+ "DefinedContributionPlanMaximumAnnualContributionPerEmployeePercent": [
+  "pure"
+ ],
+ "DefinedContributionPlanMaximumAnnualContributionsPerEmployeePercent": [
+  "pure"
+ ],
+ "DepositsReceivedForSecuritiesLoanedAtCarryingValue": [
+  "USD"
+ ],
+ "Depreciation": [
+  "USD"
+ ],
+ "DerivativeAssetDesignatedAsHedgingInstrumentFairValue": [
+  "USD"
+ ],
+ "DerivativeAssetFairValueGrossAssetIncludingNotSubjectToMasterNettingArrangement": [
+  "USD"
+ ],
+ "DerivativeAssetFairValueGrossLiability": [
+  "USD"
+ ],
+ "DerivativeAssetNotDesignatedAsHedgingInstrumentFairValue": [
+  "USD"
+ ],
+ "DerivativeAssets": [
+  "USD"
+ ],
+ "DerivativeCollateralObligationToReturnCash": [
+  "USD"
+ ],
+ "DerivativeCollateralRightToReclaimCash": [
+  "USD"
+ ],
+ "DerivativeFairValueOfDerivativeAsset": [
+  "USD"
+ ],
+ "DerivativeFairValueOfDerivativeLiability": [
+  "USD"
+ ],
+ "DerivativeInstrumentsNotDesignatedAsHedgingInstrumentsGainLossNet": [
+  "USD"
+ ],
+ "DerivativeLiabilities": [
+  "USD"
+ ],
+ "DerivativeLiabilityFairValueGrossAsset": [
+  "USD"
+ ],
+ "DerivativeLiabilityFairValueGrossLiabilityIncludingNotSubjectToMasterNettingArrangement": [
+  "USD"
+ ],
+ "DerivativePriceRiskOptionStrikePrice": [
+  "pure"
+ ],
+ "DividendsCommonStockCash": [
+  "USD"
+ ],
+ "DividendsStock": [
+  "USD"
+ ],
+ "EarningsPerShareBasic": [
+  "USD/shares"
+ ],
+ "EarningsPerShareDiluted": [
+  "USD/shares"
+ ],
+ "EffectiveIncomeTaxRateContinuingOperations": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationDeductionsQualifiedProductionActivities": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationForeignIncomeTaxRateDifferential": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationNondeductibleExpense": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationNondeductibleExpenseShareBasedCompensationCost": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationOtherAdjustments": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationStateAndLocalIncomeTaxes": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationTaxCreditsResearch": [
+  "pure"
+ ],
+ "EffectiveIncomeTaxRateReconciliationTaxSettlementsDomestic": [
+  "pure"
+ ],
+ "EffectOfExchangeRateOnCashAndCashEquivalents": [
+  "USD"
+ ],
+ "EmployeeRelatedLiabilitiesCurrent": [
+  "USD"
+ ],
+ "EmployeeServiceShareBasedCompensationCashReceivedFromExerciseOfStockOptions": [
+  "USD"
+ ],
+ "EmployeeServiceShareBasedCompensationTaxBenefitFromCompensationExpense": [
+  "USD"
+ ],
+ "EmployeeServiceShareBasedCompensationTaxBenefitRealizedFromExerciseOfStockOptions": [
+  "USD"
+ ],
+ "EntityWideDisclosureOnGeographicAreasLongLivedAssetsInEntitysCountryOfDomicile": [
+  "USD"
+ ],
+ "EntityWideDisclosureOnGeographicAreasLongLivedAssetsInForeignCountries": [
+  "USD"
+ ],
+ "EntityWideDisclosureOnGeographicAreasRevenueFromExternalCustomersAttributedToEntitysCountryOfDomicile": [
+  "USD"
+ ],
+ "EntityWideDisclosureOnGeographicAreasRevenueFromExternalCustomersAttributedToForeignCountries": [
+  "USD"
+ ],
+ "EquitySecuritiesFvNiRealizedGainLoss": [
+  "USD"
+ ],
+ "EquitySecuritiesFvNiUnrealizedGainLoss": [
+  "USD"
+ ],
+ "EquitySecuritiesWithoutReadilyDeterminableFairValueAmount": [
+  "USD"
+ ],
+ "ExcessTaxBenefitFromShareBasedCompensationFinancingActivities": [
+  "USD"
+ ],
+ "ExcessTaxBenefitFromShareBasedCompensationOperatingActivities": [
+  "USD"
+ ],
+ "FairValueAssetsMeasuredOnRecurringBasisCashAndCashEquivalents": [
+  "USD"
+ ],
+ "FairValueAssetsMeasuredOnRecurringBasisChangeInUnrealizedGainLossIncludedInOtherIncome": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetGainLossIncludedInEarnings": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetGainLossIncludedInEarnings1": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetGainLossIncludedInOtherComprehensiveIncome": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetGainLossIncludedInOtherComprehensiveIncomeLoss": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetPurchases": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetPurchasesSalesIssuancesSettlements": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetTransfersNet": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetTransfersOutOfLevel3": [
+  "USD"
+ ],
+ "FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetValue": [
+  "USD"
+ ],
+ "FinanceLeaseInterestExpense": [
+  "USD"
+ ],
+ "FinanceLeaseInterestPaymentOnLiability": [
+  "USD"
+ ],
+ "FinanceLeaseLiability": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityPaymentsDue": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityPaymentsDueAfterYearFive": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityPaymentsDueNextTwelveMonths": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityPaymentsDueYearFive": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityPaymentsDueYearFour": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityPaymentsDueYearThree": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityPaymentsDueYearTwo": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityPaymentsRemainderOfFiscalYear": [
+  "USD"
+ ],
+ "FinanceLeaseLiabilityUndiscountedExcessAmount": [
+  "USD"
+ ],
+ "FinanceLeasePrincipalPayments": [
+  "USD"
+ ],
+ "FinanceLeaseRightOfUseAsset": [
+  "USD"
+ ],
+ "FinanceLeaseRightOfUseAssetAmortization": [
+  "USD"
+ ],
+ "FinanceLeaseWeightedAverageDiscountRatePercent": [
+  "pure"
+ ],
+ "FiniteLivedIntangibleAssetsAccumulatedAmortization": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsAmortizationExpense": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFive": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsAmortizationExpenseNextTwelveMonths": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsAmortizationExpenseRemainderOfFiscalYear": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsAmortizationExpenseYearFive": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsAmortizationExpenseYearFour": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsAmortizationExpenseYearThree": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsAmortizationExpenseYearTwo": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsGross": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsNet": [
+  "USD"
+ ],
+ "FiniteLivedIntangibleAssetsUsefulLifeMaximum": [
+  "pure",
+  "Year"
+ ],
+ "FiniteLivedIntangibleAssetsUsefulLifeMinimum": [
+  "pure",
+  "Year"
+ ],
+ "FinitelivedIntangibleAssetsAcquired1": [
+  "USD"
+ ],
+ "ForeignCurrencyCashFlowHedgeGainLossReclassifiedToEarningsNet": [
+  "USD"
+ ],
+ "ForeignCurrencyCashFlowHedgeGainLossToBeReclassifiedDuringNext12Months": [
+  "USD"
+ ],
+ "ForeignCurrencyTransactionGainLossBeforeTax": [
+  "USD"
+ ],
+ "FurnitureAndFixturesGross": [
+  "USD"
+ ],
+ "FutureAmortizationExpenseAfterYearFive": [
+  "USD"
+ ],
+ "FutureAmortizationExpenseYearFive": [
+  "USD"
+ ],
+ "FutureAmortizationExpenseYearFour": [
+  "USD"
+ ],
+ "FutureAmortizationExpenseYearOne": [
+  "USD"
+ ],
+ "FutureAmortizationExpenseYearThree": [
+  "USD"
+ ],
+ "FutureAmortizationExpenseYearTwo": [
+  "USD"
+ ],
+ "GainLossOnComponentsExcludedFromAssessmentOfForeignCurrencyCashFlowHedgeEffectiveness": [
+  "USD"
+ ],
+ "GainLossOnDerivativeInstrumentsNetPretax": [
+  "USD"
+ ],
+ "GainLossOnInvestments": [
+  "USD"
+ ],
+ "GeneralAndAdministrativeExpense": [
+  "USD"
+ ],
+ "Goodwill": [
+  "USD"
+ ],
+ "GoodwillAcquiredDuringPeriod": [
+  "USD"
+ ],
+ "GoodwillImpairedAccumulatedImpairmentLoss": [
+  "USD"
+ ],
+ "GoodwillImpairmentLoss": [
+  "USD"
+ ],
+ "GoodwillOtherChanges": [
+  "USD"
+ ],
+ "GoodwillOtherIncreaseDecrease": [
+  "USD"
+ ],
+ "GoodwillWrittenOffRelatedToSaleOfBusinessUnit": [
+  "USD"
+ ],
+ "GrossProfit": [
+  "USD"
+ ],
+ "HeldToMaturitySecurities": [
+  "USD"
+ ],
+ "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingGain": [
+  "USD"
+ ],
+ "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingLoss": [
+  "USD"
+ ],
+ "HeldToMaturitySecuritiesAmortizedCostBeforeOtherThanTemporaryImpairment": [
+  "USD"
+ ],
+ "HeldToMaturitySecuritiesContinuousUnrealizedLossPositionLessThanTwelveMonthsFairValue": [
+  "USD"
+ ],
+ "HeldToMaturitySecuritiesContinuousUnrealizedLossPositionTwelveMonthsOrLongerFairValue": [
+  "USD"
+ ],
+ "HeldToMaturitySecuritiesFairValue": [
+  "USD"
+ ],
+ "ImpairmentEffectOnEarningsPerShareAfterTax": [
+  "USD/shares"
+ ],
+ "ImpairmentOfInvestments": [
+  "USD"
+ ],
+ "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic": [
+  "USD"
+ ],
+ "IncomeLossFromContinuingOperationsBeforeIncomeTaxesForeign": [
+  "USD"
+ ],
+ "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments": [
+  "USD"
+ ],
+ "IncomeTaxExpenseBenefit": [
+  "USD"
+ ],
+ "IncomeTaxesPaidNet": [
+  "USD"
+ ],
+ "IncreaseDecreaseInAccountsPayable": [
+  "USD"
+ ],
+ "IncreaseDecreaseInAccountsReceivable": [
+  "USD"
+ ],
+ "IncreaseDecreaseInAccruedIncomeTaxesPayable": [
+  "USD"
+ ],
+ "IncreaseDecreaseInCashCollateralForLoanedSecurities": [
+  "USD"
+ ],
+ "IncreaseDecreaseInCollateralHeldUnderSecuritiesLending": [
+  "USD"
+ ],
+ "IncreaseDecreaseInContractWithCustomerLiability": [
+  "USD"
+ ],
+ "IncreaseDecreaseInDeferredRevenue": [
+  "USD"
+ ],
+ "IncreaseDecreaseInInventories": [
+  "USD"
+ ],
+ "IncreaseDecreaseInOtherCurrentAssets": [
+  "USD"
+ ],
+ "IncreaseDecreaseInOtherCurrentLiabilities": [
+  "USD"
+ ],
+ "IncreaseDecreaseInOtherNoncurrentAssets": [
+  "USD"
+ ],
+ "IncreaseDecreaseInOtherNoncurrentLiabilities": [
+  "USD"
+ ],
+ "IncrementalCommonSharesAttributableToShareBasedPaymentArrangements": [
+  "shares"
+ ],
+ "IntangibleAssetsNetExcludingGoodwill": [
+  "USD"
+ ],
+ "InterestExpense": [
+  "USD"
+ ],
+ "InterestPaid": [
+  "USD"
+ ],
+ "InventoryAdjustments": [
+  "USD"
+ ],
+ "InventoryFinishedGoods": [
+  "USD"
+ ],
+ "InventoryFinishedGoodsNetOfReserves": [
+  "USD"
+ ],
+ "InventoryNet": [
+  "USD"
+ ],
+ "InventoryRawMaterials": [
+  "USD"
+ ],
+ "InventoryRawMaterialsNetOfReserves": [
+  "USD"
+ ],
+ "InventoryWorkInProcess": [
+  "USD"
+ ],
+ "InventoryWorkInProcessNetOfReserves": [
+  "USD"
+ ],
+ "InvestmentIncomeInterestAndDividend": [
+  "USD"
+ ],
+ "InvestmentIncomeNet": [
+  "USD"
+ ],
+ "Land": [
+  "USD"
+ ],
+ "LeaseAndRentalExpense": [
+  "USD"
+ ],
+ "LeaseholdImprovementsGross": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityPaymentsDue": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityPaymentsDueYearFive": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityPaymentsDueYearFour": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityPaymentsDueYearThree": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityPaymentsRemainderOfFiscalYear": [
+  "USD"
+ ],
+ "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount": [
+  "USD"
+ ],
+ "Liabilities": [
+  "USD"
+ ],
+ "LiabilitiesAndStockholdersEquity": [
+  "USD"
+ ],
+ "LiabilitiesCurrent": [
+  "USD"
+ ],
+ "LineOfCreditFacilityCurrentBorrowingCapacity": [
+  "USD"
+ ],
+ "LineOfCreditFacilityMaximumBorrowingCapacity": [
+  "USD"
+ ],
+ "LitigationReserveNoncurrent": [
+  "USD"
+ ],
+ "LongTermDebt": [
+  "USD"
+ ],
+ "LongTermDebtCurrent": [
+  "USD"
+ ],
+ "LongTermDebtFairValue": [
+  "USD"
+ ],
+ "LongTermDebtMaturitiesRepaymentsOfPrincipalAfterYearFive": [
+  "USD"
+ ],
+ "LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths": [
+  "USD"
+ ],
+ "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFive": [
+  "USD"
+ ],
+ "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFour": [
+  "USD"
+ ],
+ "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearThree": [
+  "USD"
+ ],
+ "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearTwo": [
+  "USD"
+ ],
+ "LongTermDebtMaturitiesRepaymentsOfPrincipalRemainderOfFiscalYear": [
+  "USD"
+ ],
+ "LongTermDebtNoncurrent": [
+  "USD"
+ ],
+ "LongTermInvestments": [
+  "USD"
+ ],
+ "LongTermNotesPayable": [
+  "USD"
+ ],
+ "LossContingencyAccrualCarryingValueCurrent": [
+  "USD"
+ ],
+ "LossContingencyRangeOfPossibleLossPortionNotAccrued": [
+  "USD"
+ ],
+ "MarketableSecuritiesRealizedGainLossOtherThanTemporaryImpairmentsAmount": [
+  "USD"
+ ],
+ "MinorityInterestOwnershipPercentageByParent": [
+  "pure"
+ ],
+ "NetCashProvidedByUsedInFinancingActivities": [
+  "USD"
+ ],
+ "NetCashProvidedByUsedInFinancingActivitiesContinuingOperations": [
+  "USD"
+ ],
+ "NetCashProvidedByUsedInInvestingActivities": [
+  "USD"
+ ],
+ "NetCashProvidedByUsedInInvestingActivitiesContinuingOperations": [
+  "USD"
+ ],
+ "NetCashProvidedByUsedInOperatingActivities": [
+  "USD"
+ ],
+ "NetCashProvidedByUsedInOperatingActivitiesContinuingOperations": [
+  "USD"
+ ],
+ "NetIncomeLoss": [
+  "USD"
+ ],
+ "NoncashOrPartNoncashAcquisitionFixedAssetsAcquired1": [
+  "USD"
+ ],
+ "NoncurrentAssets": [
+  "USD"
+ ],
+ "NonoperatingIncomeExpense": [
+  "USD"
+ ],
+ "NumberOfBusinessesAcquired": [
+  "Entity"
+ ],
+ "NumberOfReportableSegments": [
+  "Segment"
+ ],
+ "OperatingExpenses": [
+  "USD"
+ ],
+ "OperatingIncomeLoss": [
+  "USD"
+ ],
+ "OperatingLeaseCost": [
+  "USD"
+ ],
+ "OperatingLeaseImpairmentLoss": [
+  "USD"
+ ],
+ "OperatingLeaseLiability": [
+  "USD"
+ ],
+ "OperatingLeaseLiabilityNoncurrent": [
+  "USD"
+ ],
+ "OperatingLeasePayments": [
+  "USD"
+ ],
+ "OperatingLeaseRightOfUseAsset": [
+  "USD"
+ ],
+ "OperatingLeaseWeightedAverageDiscountRatePercent": [
+  "pure"
+ ],
+ "OperatingLossCarryforwards": [
+  "USD"
+ ],
+ "OptionIndexedToIssuersEquityStrikePrice": [
+  "USD/Contract",
+  "USD/Investment"
+ ],
+ "OtherAccruedLiabilitiesNoncurrent": [
+  "USD"
+ ],
+ "OtherAssets": [
+  "USD"
+ ],
+ "OtherAssetsCurrent": [
+  "USD"
+ ],
+ "OtherAssetsFairValueDisclosure": [
+  "USD"
+ ],
+ "OtherAssetsNoncurrent": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeAvailableForSaleSecuritiesAdjustmentNetOfTaxPeriodIncreaseDecrease": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeDerivativesQualifyingAsHedgesNetOfTaxPeriodIncreaseDecrease": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeForeignCurrencyTransactionAndTranslationAdjustmentNetOfTaxPeriodIncreaseDecrease": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeForeignCurrencyTranslationAdjustmentTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossDerivativesQualifyingAsHedgesNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossDerivativesQualifyingAsHedgesTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecrease": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossReclassificationAdjustmentForSaleOfSecuritiesIncludedInNetIncomeNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossReclassificationAdjustmentForSaleOfSecuritiesIncludedInNetIncomeTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIForSaleOfSecuritiesNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIForSaleOfSecuritiesTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIOnDerivativesNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIOnDerivativesTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossReclassificationAdjustmentOnDerivativesIncludedInNetIncomeNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeLossReclassificationAdjustmentOnDerivativesIncludedInNetIncomeTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeReclassificationAdjustmentForSaleOfSecuritiesIncludedInNetIncomeNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeReclassificationAdjustmentForSaleOfSecuritiesIncludedInNetIncomeTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeReclassificationAdjustmentOnDerivativesIncludedInNetIncomeNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeReclassificationAdjustmentOnDerivativesIncludedInNetIncomeTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeUnrealizedGainLossOnDerivativesArisingDuringPeriodNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeUnrealizedGainLossOnDerivativesArisingDuringPeriodTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax": [
+  "USD"
+ ],
+ "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodTax": [
+  "USD"
+ ],
+ "OtherLiabilities": [
+  "USD"
+ ],
+ "OtherLiabilitiesCurrent": [
+  "USD"
+ ],
+ "OtherLiabilitiesFairValueDisclosure": [
+  "USD"
+ ],
+ "OtherLiabilitiesNoncurrent": [
+  "USD"
+ ],
+ "OtherNonoperatingIncomeExpense": [
+  "USD"
+ ],
+ "OtherReceivablesGrossCurrent": [
+  "USD"
+ ],
+ "PaymentsForProceedsFromOtherInvestingActivities": [
+  "USD"
+ ],
+ "PaymentsForRepurchaseOfCommonStock": [
+  "USD"
+ ],
+ "PaymentsForRestructuring": [
+  "USD"
+ ],
+ "PaymentsOfDebtExtinguishmentCosts": [
+  "USD"
+ ],
+ "PaymentsOfDebtRestructuringCosts": [
+  "USD"
+ ],
+ "PaymentsOfDividendsCommonStock": [
+  "USD"
+ ],
+ "PaymentsRelatedToTaxWithholdingForShareBasedCompensation": [
+  "USD"
+ ],
+ "PaymentsToAcquireBusinessesNetOfCashAcquired": [
+  "USD"
+ ],
+ "PaymentsToAcquireInvestments": [
+  "USD"
+ ],
+ "PaymentsToAcquirePropertyPlantAndEquipment": [
+  "USD"
+ ],
+ "ProceedsFromConvertibleDebt": [
+  "USD"
+ ],
+ "ProceedsFromDebtMaturingInMoreThanThreeMonths": [
+  "USD"
+ ],
+ "ProceedsFromDivestitureOfBusinesses": [
+  "USD"
+ ],
+ "ProceedsFromIssuanceOfCommonStock": [
+  "USD"
+ ],
+ "ProceedsFromLinesOfCredit": [
+  "USD"
+ ],
+ "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities": [
+  "USD"
+ ],
+ "ProceedsFromPaymentsForOtherFinancingActivities": [
+  "USD"
+ ],
+ "ProceedsFromRepaymentsOfShortTermDebtMaturingInThreeMonthsOrLess": [
+  "USD"
+ ],
+ "ProceedsFromSaleOfAvailableForSaleSecurities": [
+  "USD"
+ ],
+ "ProceedsFromStockOptionsExercised": [
+  "USD"
+ ],
+ "ProductWarrantyAccrual": [
+  "USD"
+ ],
+ "ProductWarrantyAccrualNoncurrent": [
+  "USD"
+ ],
+ "ProductWarrantyAccrualPayments": [
+  "USD"
+ ],
+ "ProductWarrantyAccrualPreexistingIncreaseDecrease": [
+  "USD"
+ ],
+ "ProductWarrantyAccrualWarrantiesIssued": [
+  "USD"
+ ],
+ "PropertyPlantAndEquipmentGross": [
+  "USD"
+ ],
+ "PropertyPlantAndEquipmentNet": [
+  "USD"
+ ],
+ "RecognitionOfDeferredRevenue": [
+  "USD"
+ ],
+ "RepaymentsOfCommercialPaper": [
+  "USD"
+ ],
+ "RepaymentsOfConvertibleDebt": [
+  "USD"
+ ],
+ "RepaymentsOfDebtMaturingInMoreThanThreeMonths": [
+  "USD"
+ ],
+ "ResearchAndDevelopmentExpense": [
+  "USD"
+ ],
+ "RestructuringAndRelatedCostExpectedCostRemaining1": [
+  "USD"
+ ],
+ "RestructuringAndRelatedCostNumberOfPositionsEliminatedInceptionToDate": [
+  "Position"
+ ],
+ "RestructuringCharges": [
+  "USD"
+ ],
+ "RestructuringReserve": [
+  "USD"
+ ],
+ "RestructuringReserveAccrualAdjustment1": [
+  "USD"
+ ],
+ "RestructuringReserveSettledWithCash": [
+  "USD"
+ ],
+ "RestructuringReserveSettledWithoutCash1": [
+  "USD"
+ ],
+ "RestructuringReserveSettledWithoutCash2": [
+  "USD"
+ ],
+ "RetainedEarningsAccumulatedDeficit": [
+  "USD"
+ ],
+ "RevenueFromContractWithCustomerExcludingAssessedTax": [
+  "USD"
+ ],
+ "RevenueRemainingPerformanceObligation": [
+  "USD"
+ ],
+ "RevenueRemainingPerformanceObligationPercentage": [
+  "pure"
+ ],
+ "Revenues": [
+  "USD"
+ ],
+ "RightOfUseAssetObtainedInExchangeForFinanceLeaseLiability": [
+  "USD"
+ ],
+ "RightOfUseAssetObtainedInExchangeForOperatingLeaseLiability": [
+  "USD"
+ ],
+ "SalesRevenueGoodsNet": [
+  "USD"
+ ],
+ "SalesRevenueNet": [
+  "USD"
+ ],
+ "SecuritiesLoaned": [
+  "USD"
+ ],
+ "SecuritiesReceivedAsCollateral": [
+  "USD"
+ ],
+ "SegmentReportingReconcilingItemForOperatingProfitLossFromSegmentToConsolidatedAmount": [
+  "USD"
+ ],
+ "SellingAndMarketingExpense": [
+  "USD"
+ ],
+ "SeveranceCosts": [
+  "USD"
+ ],
+ "ShareBasedCompensation": [
+  "USD"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsRiskFreeInterestRateMaximum": [
+  "pure"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsRiskFreeInterestRateMinimum": [
+  "pure"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardMaximumEmployeeSubscriptionRate": [
+  "pure"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAuthorized": [
+  "shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExercisableIntrinsicValue": [
+  "USD"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExercisableNumber": [
+  "shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExercisableWeightedAverageExercisePrice": [
+  "USD/shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExercisableWeightedAverageRemainingContractualTerm": [
+  "pure",
+  "Year"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExercisesInPeriod": [
+  "shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExercisesInPeriodTotalIntrinsicValue": [
+  "USD"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExercisesInPeriodWeightedAverageExercisePrice": [
+  "USD"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpirationsInPeriod": [
+  "shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpirationsInPeriodWeightedAverageExercisePrice": [
+  "USD"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsForfeituresAndExpirationsInPeriod": [
+  "shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsForfeituresAndExpirationsInPeriodWeightedAverageExercisePrice": [
+  "USD/shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsForfeituresInPeriod": [
+  "shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsForfeituresInPeriodWeightedAverageExercisePrice": [
+  "USD"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriod": [
+  "shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageExercisePrice": [
+  "USD"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingIntrinsicValue": [
+  "USD"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingNumber": [
+  "shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingWeightedAverageExercisePrice": [
+  "USD/shares"
+ ],
+ "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingWeightedAverageRemainingContractualTerm": [
+  "pure"
+ ],
+ "ShareBasedCompensationArrangementsByShareBasedPaymentAwardOptionsExercisesInPeriodWeightedAverageExercisePrice": [
+  "USD/shares"
+ ],
+ "ShareBasedCompensationArrangementsByShareBasedPaymentAwardOptionsExpirationsInPeriodWeightedAverageExercisePrice": [
+  "USD/shares"
+ ],
+ "ShareBasedCompensationArrangementsByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageExercisePrice": [
+  "USD/shares"
+ ],
+ "ShareBasedCompensationSharesAuthorizedUnderStockOptionPlansExercisePriceRangeNumberOfExercisableOptions": [
+  "shares"
+ ],
+ "SharebasedCompensationArrangementBySharebasedPaymentAwardOptionsExercisableIntrinsicValue1": [
+  "USD"
+ ],
+ "SharebasedCompensationArrangementBySharebasedPaymentAwardOptionsOutstandingWeightedAverageRemainingContractualTerm1": [
+  "Year"
+ ],
+ "SharebasedCompensationArrangementBySharebasedPaymentAwardPurchasePriceOfCommonStockPercent": [
+  "pure"
+ ],
+ "ShortTermBorrowings": [
+  "USD"
+ ],
+ "ShortTermInvestments": [
+  "USD"
+ ],
+ "StockholdersEquity": [
+  "USD"
+ ],
+ "StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans": [
+  "shares"
+ ],
+ "StockIssuedDuringPeriodSharesNewIssues": [
+  "shares"
+ ],
+ "StockIssuedDuringPeriodSharesStockOptionsExercised": [
+  "shares"
+ ],
+ "StockRepurchasedDuringPeriodShares": [
+  "shares"
+ ],
+ "StockRepurchasedDuringPeriodValue": [
+  "USD"
+ ],
+ "StockRepurchaseProgramAuthorizedAmount": [
+  "USD"
+ ],
+ "StockRepurchaseProgramAuthorizedAmount1": [
+  "USD"
+ ],
+ "StockRepurchaseProgramRemainingAuthorizedRepurchaseAmount": [
+  "USD"
+ ],
+ "StockRepurchaseProgramRemainingAuthorizedRepurchaseAmount1": [
+  "USD"
+ ],
+ "TaxAdjustmentsSettlementsAndUnusualProvisions": [
+  "USD"
+ ],
+ "TaxBenefitFromStockOptionsExercised": [
+  "USD"
+ ],
+ "TaxCutsAndJobsActOf2017IncomeTaxExpenseBenefit": [
+  "USD"
+ ],
+ "TaxCutsAndJobsActOf2017MeasurementPeriodAdjustmentIncomeTaxExpenseBenefit": [
+  "USD"
+ ],
+ "UndistributedEarningsOfForeignSubsidiaries": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefits": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefitsDecreasesResultingFromPriorPeriodTaxPositions": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefitsDecreasesResultingFromSettlementsWithTaxingAuthorities": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefitsIncomeTaxPenaltiesAndInterestAccrued": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefitsIncomeTaxPenaltiesAndInterestExpense": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefitsIncreasesResultingFromCurrentPeriodTaxPositions": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefitsIncreasesResultingFromPriorPeriodTaxPositions": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefitsReductionsResultingFromLapseOfApplicableStatuteOfLimitations": [
+  "USD"
+ ],
+ "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate": [
+  "USD"
+ ],
+ "WeightedAverageNumberOfDilutedSharesOutstanding": [
+  "shares"
+ ],
+ "WeightedAverageNumberOfSharesOutstandingBasic": [
+  "shares"
+ ],
+ "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest": [
+  "USD"
+ ],
+ "EffectiveIncomeTaxRateReconciliationFdiiPercent": [
+  "pure"
+ ],
+ "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations": [
+  "USD"
+ ],
+ "LossContingencyAccrualAtCarryingValue": [
+  "USD"
+ ],
+ "SeveranceCosts1": [
+  "USD"
+ ],
+ "RestructuringAndRelatedCostExpectedNumberOfPositionsEliminated": [
+  "Job"
+ ],
+ "ProceedsFromShortTermDebtMaturingInThreeMonthsOrLess": [
+  "USD"
+ ]
+}
