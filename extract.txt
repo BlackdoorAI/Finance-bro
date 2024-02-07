@@ -66,5 +66,7 @@ Todo:
     Implement replacement logic 
         if not enough try additive, but its fucked 
         you are really going to have to use additive, goddamit 
+        NONCURRENTASSETS
+        Figure out priority of add or sub 
 
     Sleeps are clogging up the semaphore
