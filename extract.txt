@@ -63,10 +63,10 @@ Todo:
     Maybe split the price part into a second async price_init
         async is fucking up again
 
-    Implement replacement logic 
-        if not enough try additive, but its fucked 
-        you are really going to have to use additive, goddamit 
-        NONCURRENTASSETS
-        Figure out priority of add or sub 
-
     Sleeps are clogging up the semaphore
+
+    NONCURRENTASSETS
+
+    Finish off indicator frame merges 
+    make sure to test additive for recursive_fact
+    rename the date ranges to not be fucked up
