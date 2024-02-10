@@ -59,14 +59,13 @@ Methods to figure out relationships:
 Alternatively you can use the frames api to get the data if it all goes to hell
 I am not fucking dealing with danish kroner.
 
-Todo:
+Misc:
     Maybe split the price part into a second async price_init
         async is fucking up again
 
     Sleeps are clogging up the semaphore
 
-    NONCURRENTASSETS
+    Start_times can create artificial forwardfills, if model isn't working, consider this
 
-    Finish off indicator frame merges 
-    make sure to test additive for recursive_fact
-    rename the date ranges to not be fucked up
+Todo:
+    Call all of the comps and get all the frames
