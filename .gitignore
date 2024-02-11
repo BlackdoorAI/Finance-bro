@@ -12,5 +12,5 @@ companies_data/*
 !companies_data/.gitkeep
 extract.txt
 
-FolderName/*
-!FolderName/.gitkeep
+companies_data_missing/*
+!companies_data_missing/.gitkeep
