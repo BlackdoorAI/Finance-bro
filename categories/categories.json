@@ -1,0 +1,7 @@
+{"Uncategorized": [-1, 0],
+"Agriculture": [1,999], 
+"Oil and construction": [1000, 1999],
+"Household and property consumables": [2000, 2999],
+"Manufacturing, technology and heavy machinery": [3000, 3999],
+"Transportation and communication": [4000, 4999]
+}
