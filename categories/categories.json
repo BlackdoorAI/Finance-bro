@@ -1,7 +1,12 @@
 {"Uncategorized": [-1, 0],
 "Agriculture": [1,999], 
-"Oil and construction": [1000, 1999],
-"Household and property consumables": [2000, 2999],
-"Manufacturing, technology and heavy machinery": [3000, 3999],
-"Transportation and communication": [4000, 4999]
+"Oil and Construction": [1000, 1999],
+"Household and Property consumables": [2000, 2999],
+"Manufacturing, Technology and Heavy Machinery": [3000, 3999],
+"Transportation and Communication": [4000, 4999],
+"Wholesale and Retail": [5000,5999],
+"Banking and Finance" : [6000, 6999],
+"Services": [7000, 7999],
+"Science and Healthcare" : [8000,8999],
+"Non-Operating" : [9000, 9999]
 }

@@ -1,7 +1,459 @@
 {
- "fuckoff": [
-  {
-   "jsonloader": "."
-  }
- ]
+ "Uncategorized": {
+  "BHP": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ],
+  "RIO": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ]
+ },
+ "Agriculture": {},
+ "Oil and Construction": {
+  "SHEL": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ],
+  "TTE": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ]
+ },
+ "Household and Property consumables": {
+  "LLY": [
+   "FreeCashFlow"
+  ],
+  "XOM": [
+   "CostOfGoodsAndServicesSold",
+   "Goodwill"
+  ],
+  "CVX": [
+   "FreeCashFlow"
+  ],
+  "PEP": [
+   "FreeCashFlow"
+  ],
+  "AZN": [
+   "EntityCommonStockSharesOutstanding",
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ],
+  "NVS": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ],
+  "LIN": [
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Revenues"
+  ],
+  "ABT": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent"
+  ],
+  "PM": [
+   "CostsAndExpenses"
+  ],
+  "COP": [
+   "FreeCashFlow"
+  ],
+  "BUD": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ]
+ },
+ "Manufacturing, Technology and Heavy Machinery": {
+  "TSM": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "Goodwill",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ],
+  "DHR": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent"
+  ],
+  "NKE": [
+   "CostsAndExpenses",
+   "OperatingIncomeLoss"
+  ],
+  "QCOM": [
+   "FreeCashFlow"
+  ],
+  "BA": [
+   "InventoryNet"
+  ],
+  "TXN": [
+   "CostsAndExpenses"
+  ],
+  "CAT": [
+   "LongTermDebt"
+  ]
+ },
+ "Transportation and Communication": {
+  "LTMAY": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "FreeCashFlow"
+  ],
+  "CMCSA": [
+   "InventoryNet",
+   "LongTermDebt"
+  ],
+  "VZ": [
+   "FreeCashFlow"
+  ],
+  "UNP": [
+   "CostOfGoodsAndServicesSold",
+   "Goodwill",
+   "GrossProfit",
+   "InventoryNet"
+  ],
+  "NEE": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "FreeCashFlow"
+  ],
+  "BKNG": [
+   "InventoryNet"
+  ]
+ },
+ "Wholesale and Retail": {
+  "HD": [
+   "FreeCashFlow"
+  ],
+  "COST": [
+   "AccountsReceivableNet"
+  ],
+  "MCD": [
+   "AccountsReceivableNet"
+  ],
+  "LOW": [
+   "AccountsReceivableNet"
+  ]
+ },
+ "Banking and Finance": {
+  "BRK-B": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "EarningsPerShareDiluted",
+   "LiabilitiesCurrent",
+   "LongTermDebt",
+   "AssetsNoncurrent",
+   "PropertyPlantAndEquipmentNet",
+   "ShortTermBorrowings"
+  ],
+  "JPM": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "Depreciation",
+   "GrossProfit",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "OperatingIncomeLoss",
+   "FreeCashFlow"
+  ],
+  "BAC": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "FreeCashFlow"
+  ],
+  "WFC": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AssetsCurrent",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "FreeCashFlow"
+  ],
+  "HDB": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent"
+  ],
+  "BX": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent"
+  ],
+  "HSBC": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "Goodwill",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "LongTermDebt",
+   "AssetsNoncurrent",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ],
+  "MS": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "FreeCashFlow"
+  ],
+  "AXP": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "Depreciation",
+   "GrossProfit",
+   "InventoryNet",
+   "LiabilitiesCurrent"
+  ],
+  "SCHW": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent"
+  ],
+  "GS": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "LongTermDebt",
+   "AssetsNoncurrent",
+   "Revenues"
+  ],
+  "PLD": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent"
+  ],
+  "BLK": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AssetsCurrent",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "Revenues"
+  ]
+ },
+ "Services": {
+  "META": [
+   "InventoryNet",
+   "ShortTermBorrowings"
+  ],
+  "V": [
+   "EarningsPerShareDiluted",
+   "InventoryNet",
+   "FreeCashFlow"
+  ],
+  "MA": [
+   "InventoryNet"
+  ],
+  "ADBE": [
+   "InventoryNet"
+  ],
+  "CRM": [
+   "InventoryNet"
+  ],
+  "ACN": [
+   "InventoryNet",
+   "LongTermDebt"
+  ],
+  "NFLX": [
+   "AccountsReceivableNet",
+   "Goodwill",
+   "InventoryNet"
+  ],
+  "PDD": [
+   "AccountsReceivableNet",
+   "Goodwill",
+   "LongTermDebt",
+   "Revenues",
+   "ShortTermBorrowings"
+  ],
+  "SAP": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Depreciation",
+   "EarningsPerShareDiluted",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ],
+  "INTU": [
+   "InventoryNet"
+  ],
+  "DIS": [
+   "CostOfGoodsAndServicesSold"
+  ],
+  "NOW": [
+   "InventoryNet"
+  ],
+  "UBER": [
+   "CostOfGoodsAndServicesSold",
+   "InventoryNet"
+  ]
+ },
+ "Science and Healthcare": {},
+ "Non-Operating": {}
 }
