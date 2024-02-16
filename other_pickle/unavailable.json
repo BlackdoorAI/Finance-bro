@@ -1,12 +1,18 @@
 {
- "Uncategorized": {
-  "BHP": [
+ "Uncategorized": {},
+ "Agriculture": {},
+ "Oil and Construction": {
+  "XOM": [
+   "CostOfGoodsAndServicesSold",
+   "Goodwill"
+  ],
+  "SHEL": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "GrossProfit",
    "IncomeTaxesPaidNet",
@@ -18,34 +24,13 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "RIO": [
+  "BHP": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
-   "EarningsPerShareDiluted",
-   "GrossProfit",
-   "IncomeTaxesPaidNet",
-   "InventoryNet",
-   "LongTermDebt",
-   "OperatingIncomeLoss",
-   "PropertyPlantAndEquipmentNet",
-   "Revenues",
-   "ShortTermBorrowings",
-   "FreeCashFlow"
-  ]
- },
- "Agriculture": {},
- "Oil and Construction": {
-  "SHEL": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "AccountsReceivableNet",
-   "CashAndCashEquivalentsAtCarryingValue",
-   "CostOfGoodsAndServicesSold",
-   "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "GrossProfit",
    "IncomeTaxesPaidNet",
@@ -63,7 +48,25 @@
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "InventoryNet",
+   "LongTermDebt",
+   "OperatingIncomeLoss",
+   "PropertyPlantAndEquipmentNet",
+   "Revenues",
+   "ShortTermBorrowings",
+   "FreeCashFlow"
+  ],
+  "RIO": [
+   "AccountsPayableAndAccruedLiabilitiesCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "GrossProfit",
    "IncomeTaxesPaidNet",
@@ -77,19 +80,6 @@
   ]
  },
  "Household and Property consumables": {
-  "LLY": [
-   "FreeCashFlow"
-  ],
-  "XOM": [
-   "CostOfGoodsAndServicesSold",
-   "Goodwill"
-  ],
-  "CVX": [
-   "FreeCashFlow"
-  ],
-  "PEP": [
-   "FreeCashFlow"
-  ],
   "AZN": [
    "EntityCommonStockSharesOutstanding",
    "AccountsPayableAndAccruedLiabilitiesCurrent",
@@ -97,7 +87,7 @@
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "IncomeTaxesPaidNet",
    "InventoryNet",
@@ -114,7 +104,7 @@
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "IncomeTaxesPaidNet",
    "InventoryNet",
@@ -125,27 +115,13 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "LIN": [
-   "CostOfGoodsAndServicesSold",
-   "CostsAndExpenses",
-   "Revenues"
-  ],
-  "ABT": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
-  "PM": [
-   "CostsAndExpenses"
-  ],
-  "COP": [
-   "FreeCashFlow"
-  ],
   "BUD": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "IncomeTaxesPaidNet",
    "InventoryNet",
@@ -164,7 +140,7 @@
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "Goodwill",
    "IncomeTaxesPaidNet",
@@ -175,25 +151,6 @@
    "Revenues",
    "ShortTermBorrowings",
    "FreeCashFlow"
-  ],
-  "DHR": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
-  "NKE": [
-   "CostsAndExpenses",
-   "OperatingIncomeLoss"
-  ],
-  "QCOM": [
-   "FreeCashFlow"
-  ],
-  "BA": [
-   "InventoryNet"
-  ],
-  "TXN": [
-   "CostsAndExpenses"
-  ],
-  "CAT": [
-   "LongTermDebt"
   ]
  },
  "Transportation and Communication": {
@@ -203,7 +160,7 @@
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "IncomeTaxesPaidNet",
    "InventoryNet",
@@ -217,11 +174,9 @@
    "InventoryNet",
    "LongTermDebt"
   ],
-  "VZ": [
-   "FreeCashFlow"
-  ],
   "UNP": [
    "CostOfGoodsAndServicesSold",
+   "DepreciationAndAmortization",
    "Goodwill",
    "GrossProfit",
    "InventoryNet"
@@ -235,9 +190,6 @@
   ]
  },
  "Wholesale and Retail": {
-  "HD": [
-   "FreeCashFlow"
-  ],
   "COST": [
    "AccountsReceivableNet"
   ],
@@ -266,7 +218,7 @@
    "AccountsReceivableNet",
    "AssetsCurrent",
    "CostOfGoodsAndServicesSold",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "GrossProfit",
    "InventoryNet",
    "LiabilitiesCurrent",
@@ -318,7 +270,7 @@
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "Goodwill",
    "GrossProfit",
@@ -346,7 +298,7 @@
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "CostOfGoodsAndServicesSold",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "GrossProfit",
    "InventoryNet",
    "LiabilitiesCurrent"
@@ -381,22 +333,21 @@
   "BLK": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
-   "CostOfGoodsAndServicesSold",
-   "CostsAndExpenses",
    "InventoryNet",
-   "LiabilitiesCurrent",
-   "Revenues"
+   "LiabilitiesCurrent"
   ]
  },
  "Services": {
+  "GOOGL": [
+   "DepreciationAndAmortization"
+  ],
   "META": [
    "InventoryNet",
    "ShortTermBorrowings"
   ],
   "V": [
    "EarningsPerShareDiluted",
-   "InventoryNet",
-   "FreeCashFlow"
+   "InventoryNet"
   ],
   "MA": [
    "InventoryNet"
@@ -420,7 +371,6 @@
    "AccountsReceivableNet",
    "Goodwill",
    "LongTermDebt",
-   "Revenues",
    "ShortTermBorrowings"
   ],
   "SAP": [
@@ -429,7 +379,7 @@
    "CashAndCashEquivalentsAtCarryingValue",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
-   "Depreciation",
+   "DepreciationAndAmortization",
    "EarningsPerShareDiluted",
    "IncomeTaxesPaidNet",
    "InventoryNet",
@@ -450,7 +400,6 @@
    "InventoryNet"
   ],
   "UBER": [
-   "CostOfGoodsAndServicesSold",
    "InventoryNet"
   ]
  },
