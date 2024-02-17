@@ -2,11 +2,11 @@
  "Uncategorized": {},
  "Agriculture": {},
  "Oil and Construction": {
-  "XOM": [
+  "XOM:Petroleum Refining": [
    "CostOfGoodsAndServicesSold",
    "Goodwill"
   ],
-  "SHEL": [
+  "SHEL:Crude Petroleum & Natural Gas": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -24,7 +24,7 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "BHP": [
+  "BHP:Metal Mining": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -42,7 +42,7 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "TTE": [
+  "TTE:Crude Petroleum & Natural Gas": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -60,7 +60,7 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "RIO": [
+  "RIO:Metal Mining": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -80,7 +80,7 @@
   ]
  },
  "Household and Property consumables": {
-  "AZN": [
+  "AZN:Pharmaceutical Preparations": [
    "EntityCommonStockSharesOutstanding",
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
@@ -98,7 +98,7 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "NVS": [
+  "NVS:Pharmaceutical Preparations": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -115,7 +115,7 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "BUD": [
+  "BUD:Malt Beverages": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -134,7 +134,7 @@
   ]
  },
  "Manufacturing, Technology and Heavy Machinery": {
-  "TSM": [
+  "TSM:Semiconductors & Related Devices": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -154,7 +154,7 @@
   ]
  },
  "Transportation and Communication": {
-  "LTMAY": [
+  "LTMAY:Air Transportation, Scheduled": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -170,38 +170,38 @@
    "Revenues",
    "FreeCashFlow"
   ],
-  "CMCSA": [
+  "CMCSA:Cable & Other Pay Television Services": [
    "InventoryNet",
    "LongTermDebt"
   ],
-  "UNP": [
+  "UNP:Railroads, Line-Haul Operating": [
    "CostOfGoodsAndServicesSold",
    "DepreciationAndAmortization",
    "Goodwill",
    "GrossProfit",
    "InventoryNet"
   ],
-  "NEE": [
+  "NEE:Electric Services": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "FreeCashFlow"
   ],
-  "BKNG": [
+  "BKNG:Transportation Services": [
    "InventoryNet"
   ]
  },
  "Wholesale and Retail": {
-  "COST": [
+  "COST:Retail-Variety Stores": [
    "AccountsReceivableNet"
   ],
-  "MCD": [
+  "MCD:Retail-Eating  Places": [
    "AccountsReceivableNet"
   ],
-  "LOW": [
+  "LOW:Retail-Lumber & Other Building Materials Dealers": [
    "AccountsReceivableNet"
   ]
  },
  "Banking and Finance": {
-  "BRK-B": [
+  "BRK-B:Fire, Marine & Casualty Insurance": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "AssetsCurrent",
@@ -213,7 +213,7 @@
    "PropertyPlantAndEquipmentNet",
    "ShortTermBorrowings"
   ],
-  "JPM": [
+  "JPM:National Commercial Banks": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "AssetsCurrent",
@@ -226,7 +226,7 @@
    "OperatingIncomeLoss",
    "FreeCashFlow"
   ],
-  "BAC": [
+  "BAC:National Commercial Banks": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "AssetsCurrent",
@@ -236,7 +236,7 @@
    "AssetsNoncurrent",
    "FreeCashFlow"
   ],
-  "WFC": [
+  "WFC:National Commercial Banks": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -246,7 +246,7 @@
    "AssetsNoncurrent",
    "FreeCashFlow"
   ],
-  "HDB": [
+  "HDB:Commercial Banks, NEC": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "AssetsCurrent",
@@ -255,7 +255,7 @@
    "LiabilitiesCurrent",
    "AssetsNoncurrent"
   ],
-  "BX": [
+  "BX:Investment Advice": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "CostOfGoodsAndServicesSold",
@@ -263,7 +263,7 @@
    "LiabilitiesCurrent",
    "AssetsNoncurrent"
   ],
-  "HSBC": [
+  "HSBC:Savings Institution, Federally Chartered": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "AssetsCurrent",
@@ -285,7 +285,7 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "MS": [
+  "MS:Security Brokers, Dealers & Flotation Companies": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "CostOfGoodsAndServicesSold",
@@ -294,7 +294,7 @@
    "AssetsNoncurrent",
    "FreeCashFlow"
   ],
-  "AXP": [
+  "AXP:Finance Services": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "CostOfGoodsAndServicesSold",
@@ -303,7 +303,7 @@
    "InventoryNet",
    "LiabilitiesCurrent"
   ],
-  "SCHW": [
+  "SCHW:Security Brokers, Dealers & Flotation Companies": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "CostOfGoodsAndServicesSold",
@@ -311,7 +311,7 @@
    "LiabilitiesCurrent",
    "AssetsNoncurrent"
   ],
-  "GS": [
+  "GS:Security Brokers, Dealers & Flotation Companies": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "AssetsCurrent",
@@ -323,14 +323,14 @@
    "AssetsNoncurrent",
    "Revenues"
   ],
-  "PLD": [
+  "PLD:Real Estate Investment Trusts": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
    "AssetsNoncurrent"
   ],
-  "BLK": [
+  "BLK:Security Brokers, Dealers & Flotation Companies": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "InventoryNet",
@@ -338,42 +338,42 @@
   ]
  },
  "Services": {
-  "GOOGL": [
+  "GOOGL:Services-Computer Programming, Data Processing, Etc.": [
    "DepreciationAndAmortization"
   ],
-  "META": [
+  "META:Services-Computer Programming, Data Processing, Etc.": [
    "InventoryNet",
    "ShortTermBorrowings"
   ],
-  "V": [
+  "V:Services-Business Services, NEC": [
    "EarningsPerShareDiluted",
    "InventoryNet"
   ],
-  "MA": [
+  "MA:Services-Business Services, NEC": [
    "InventoryNet"
   ],
-  "ADBE": [
+  "ADBE:Services-Prepackaged Software": [
    "InventoryNet"
   ],
-  "CRM": [
+  "CRM:Services-Prepackaged Software": [
    "InventoryNet"
   ],
-  "ACN": [
+  "ACN:Services-Business Services, NEC": [
    "InventoryNet",
    "LongTermDebt"
   ],
-  "NFLX": [
+  "NFLX:Services-Video Tape Rental": [
    "AccountsReceivableNet",
    "Goodwill",
    "InventoryNet"
   ],
-  "PDD": [
+  "PDD:Services-Business Services, NEC": [
    "AccountsReceivableNet",
    "Goodwill",
    "LongTermDebt",
    "ShortTermBorrowings"
   ],
-  "SAP": [
+  "SAP:Services-Prepackaged Software": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
@@ -390,16 +390,16 @@
    "ShortTermBorrowings",
    "FreeCashFlow"
   ],
-  "INTU": [
+  "INTU:Services-Prepackaged Software": [
    "InventoryNet"
   ],
-  "DIS": [
+  "DIS:Services-Miscellaneous Amusement & Recreation": [
    "CostOfGoodsAndServicesSold"
   ],
-  "NOW": [
+  "NOW:Services-Prepackaged Software": [
    "InventoryNet"
   ],
-  "UBER": [
+  "UBER:Services-Business Services, NEC": [
    "InventoryNet"
   ]
  },
