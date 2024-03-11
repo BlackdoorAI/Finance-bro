@@ -3,11 +3,72 @@
  "Agriculture": {},
  "Oil and Construction": {},
  "Household and Property consumables": {},
- "Manufacturing, Technology and Heavy Machinery": {},
+ "Manufacturing, Technology and Heavy Machinery": {
+  "AAPL:Electronic Computers": [
+   "Labilities"
+  ],
+  "NVDA:Semiconductors & Related Devices": [
+   "Labilities",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "AssetsNoncurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "AssetsNoncurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "AssetsNoncurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "AssetsNoncurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "AssetsNoncurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "AssetsNoncurrent",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent",
+   "AssetsNoncurrent"
+  ]
+ },
  "Transportation and Communication": {},
- "Wholesale and Retail": {},
+ "Wholesale and Retail": {
+  "AMZN:Retail-Catalog & Mail-Order Houses": [
+   "Labilities",
+   "Assets",
+   "Liabilities",
+   "AssetsCurrent"
+  ]
+ },
  "Banking and Finance": {},
- "Services": {},
+ "Services": {
+  "MSFT:Services-Prepackaged Software": [
+   "Labilities"
+  ],
+  "GOOGL:Services-Computer Programming, Data Processing, Etc.": [
+   "Labilities"
+  ]
+ },
  "Science and Healthcare": {},
  "Non-Operating": {}
 }
