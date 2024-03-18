@@ -1,26 +1,30 @@
-["EntityCommonStockSharesOutstanding",
+{
+"static":
+    ["EntityCommonStockSharesOutstanding",
     "AccountsPayableAndAccruedLiabilitiesCurrent",
     "AccountsReceivableNet",
     "Assets",
     "AssetsCurrent",
     "CashAndCashEquivalentsAtCarryingValue",
-    "CostOfGoodsAndServicesSold",
-    "CostsAndExpenses",
-    "DepreciationAndAmortization",
-    "EarningsPerShareDiluted",
     "Goodwill",
-    "GrossProfit",
-    "IncomeTaxesPaidNet",
     "InventoryNet",
     "Liabilities",
     "LiabilitiesCurrent",
     "LongTermDebt",
-    "NetIncomeLoss",
     "AssetsNoncurrent",
-    "OperatingIncomeLoss",
     "PropertyPlantAndEquipmentNet",
-    "Revenues",
     "ShortTermBorrowings",
-    "StockholdersEquity",
-    "FreeCashFlow"
-]
+    "StockholdersEquity"
+    ],
+"dynamic":
+    ["CostOfGoodsAndServicesSold",
+    "CostsAndExpenses",
+    "DepreciationAndAmortization",
+    "EarningsPerShareDiluted",
+    "GrossProfit",
+    "IncomeTaxesPaidNet",
+    "NetIncomeLoss",
+    "OperatingIncomeLoss",
+    "Revenues",
+    "FreeCashFlow"]
+}
