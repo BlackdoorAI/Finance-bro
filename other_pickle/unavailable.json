@@ -3,12 +3,7 @@
  "Agriculture": {},
  "Oil and Construction": {
   "XOM - Petroleum Refining": [
-   "Goodwill",
-   "LongTermDebt",
-   "CostOfGoodsAndServicesSold",
-   "DepreciationAndAmortization",
-   "GrossProfit",
-   "OperatingIncomeLoss"
+   "Goodwill"
   ],
   "SHEL - Crude Petroleum & Natural Gas": [
    "EntityCommonStockSharesOutstanding",
@@ -88,16 +83,6 @@
   ]
  },
  "Household and Property consumables": {
-  "LLY - Pharmaceutical Preparations": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "OperatingIncomeLoss"
-  ],
-  "MRK - Pharmaceutical Preparations": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
-  "PEP - Beverages": [
-   "AccountsReceivableNet"
-  ],
   "AZN - Pharmaceutical Preparations": [
    "EntityCommonStockSharesOutstanding",
    "AccountsPayableAndAccruedLiabilitiesCurrent",
@@ -133,21 +118,8 @@
    "Revenues",
    "FreeCashFlow"
   ],
-  "LIN - Industrial Inorganic Chemicals": [
-   "CostsAndExpenses",
-   "Revenues"
-  ],
-  "ABT - Pharmaceutical Preparations": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "Revenues"
-  ],
   "PFE - Pharmaceutical Preparations": [
    "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
-  "PM - Cigarettes": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "CostsAndExpenses",
-   "Revenues"
   ],
   "BUD - Malt Beverages": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
@@ -168,9 +140,6 @@
   ]
  },
  "Manufacturing, Technology and Heavy Machinery": {
-  "AAPL - Electronic Computers": [
-   "ShortTermBorrowings"
-  ],
   "TSM - Semiconductors & Related Devices": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AccountsReceivableNet",
@@ -189,41 +158,8 @@
    "Revenues",
    "FreeCashFlow"
   ],
-  "AVGO - Semiconductors & Related Devices": [
-   "ShortTermBorrowings"
-  ],
-  "AMD - Semiconductors & Related Devices": [
-   "CostsAndExpenses"
-  ],
-  "INTC - Semiconductors & Related Devices": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "Revenues"
-  ],
-  "TMO - Measuring & Controlling Devices, NEC": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
-  "NKE - Rubber & Plastics Footwear": [
-   "CostsAndExpenses",
-   "Revenues"
-  ],
-  "QCOM - Radio & Tv Broadcasting & Communications Equipment": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
-  "BA - Aircraft": [
-   "InventoryNet"
-  ],
-  "TXN - Semiconductors & Related Devices": [
-   "CostsAndExpenses",
-   "Revenues"
-  ],
-  "CAT - Construction Machinery & Equip": [
-   "LongTermDebt"
-  ],
   "IBM - Computer & office Equipment": [
    "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
-  "GE - Electronic & Other Electrical Equipment (No Computer Equip)": [
-   "LongTermDebt"
   ]
  },
  "Transportation and Communication": {
@@ -243,47 +179,23 @@
    "Revenues",
    "FreeCashFlow"
   ],
-  "CMCSA - Cable & Other Pay Television Services": [
-   "InventoryNet"
-  ],
   "UNP - Railroads, Line-Haul Operating": [
    "Goodwill",
-   "InventoryNet",
-   "ShortTermBorrowings",
    "DepreciationAndAmortization"
   ],
-  "UPS - Trucking & Courier Services (No Air)": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
   "NEE - Electric Services": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "LongTermDebt",
-   "FreeCashFlow"
-  ],
-  "BKNG - Transportation Services": [
-   "InventoryNet",
-   "ShortTermBorrowings"
+   "AccountsPayableAndAccruedLiabilitiesCurrent"
   ]
  },
  "Wholesale and Retail": {
-  "AMZN - Retail-Catalog & Mail-Order Houses": [
-   "Revenues"
-  ],
-  "HD - Retail-Lumber & Other Building Materials Dealers": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "ShortTermBorrowings"
-  ],
   "COST - Retail-Variety Stores": [
-   "AccountsReceivableNet",
-   "DepreciationAndAmortization"
+   "AccountsReceivableNet"
   ],
   "MCD - Retail-Eating  Places": [
    "AccountsReceivableNet"
   ],
   "LOW - Retail-Lumber & Other Building Materials Dealers": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "AccountsReceivableNet",
-   "Revenues"
+   "AccountsReceivableNet"
   ]
  },
  "Banking and Finance": {
@@ -318,7 +230,6 @@
    "InventoryNet",
    "LiabilitiesCurrent",
    "AssetsNoncurrent",
-   "CostOfGoodsAndServicesSold",
    "FreeCashFlow"
   ],
   "WFC - National Commercial Banks": [
@@ -336,16 +247,14 @@
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
-   "AssetsNoncurrent",
-   "CostOfGoodsAndServicesSold"
+   "AssetsNoncurrent"
   ],
   "BX - Investment Advice": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
-   "AssetsNoncurrent",
-   "ShortTermBorrowings"
+   "AssetsNoncurrent"
   ],
   "HSBC - Savings Institution, Federally Chartered": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
@@ -382,7 +291,6 @@
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
-   "AssetsNoncurrent",
    "CostOfGoodsAndServicesSold",
    "DepreciationAndAmortization",
    "GrossProfit"
@@ -392,8 +300,7 @@
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
-   "AssetsNoncurrent",
-   "CostOfGoodsAndServicesSold"
+   "AssetsNoncurrent"
   ],
   "GS - Security Brokers, Dealers & Flotation Companies": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
@@ -412,8 +319,7 @@
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
-   "AssetsNoncurrent",
-   "ShortTermBorrowings"
+   "AssetsNoncurrent"
   ],
   "BLK - Security Brokers, Dealers & Flotation Companies": [
    "AccountsPayableAndAccruedLiabilitiesCurrent",
@@ -421,43 +327,20 @@
    "InventoryNet",
    "LiabilitiesCurrent",
    "CostOfGoodsAndServicesSold",
-   "CostsAndExpenses",
-   "Revenues"
+   "CostsAndExpenses"
   ]
  },
  "Services": {
-  "MSFT - Services-Prepackaged Software": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
   "GOOGL - Services-Computer Programming, Data Processing, Etc.": [
    "DepreciationAndAmortization"
   ],
   "META - Services-Computer Programming, Data Processing, Etc.": [
-   "EntityCommonStockSharesOutstanding",
-   "InventoryNet",
    "ShortTermBorrowings"
   ],
   "V - Services-Business Services, NEC": [
-   "InventoryNet",
    "EarningsPerShareDiluted"
   ],
-  "MA - Services-Business Services, NEC": [
-   "InventoryNet",
-   "ShortTermBorrowings"
-  ],
-  "ORCL - Services-Prepackaged Software": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent"
-  ],
-  "ADBE - Services-Prepackaged Software": [
-   "InventoryNet"
-  ],
-  "CRM - Services-Prepackaged Software": [
-   "InventoryNet",
-   "ShortTermBorrowings"
-  ],
   "ACN - Services-Business Services, NEC": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "InventoryNet",
    "LongTermDebt"
   ],
   "NFLX - Services-Video Tape Rental": [
@@ -470,25 +353,7 @@
    "Goodwill",
    "LongTermDebt",
    "ShortTermBorrowings",
-   "IncomeTaxesPaidNet",
-   "Revenues"
-  ],
-  "INTU - Services-Prepackaged Software": [
-   "AccountsPayableAndAccruedLiabilitiesCurrent",
-   "InventoryNet"
-  ],
-  "DIS - Services-Miscellaneous Amusement & Recreation": [
-   "AccountsReceivableNet",
-   "ShortTermBorrowings"
-  ],
-  "NOW - Services-Prepackaged Software": [
-   "InventoryNet",
-   "LongTermDebt",
-   "ShortTermBorrowings"
-  ],
-  "UBER - Services-Business Services, NEC": [
-   "InventoryNet",
-   "ShortTermBorrowings"
+   "IncomeTaxesPaidNet"
   ]
  },
  "Science and Healthcare": {},
