@@ -161,7 +161,6 @@
    "AccountsPayableCurrent",
    "AccountsReceivableNet",
    "CashAndCashEquivalentsAtCarryingValue",
-   "InventoryNet",
    "LongTermDebt",
    "PropertyPlantAndEquipmentNet",
    "CostOfGoodsAndServicesSold",
@@ -173,32 +172,15 @@
    "Revenues",
    "FreeCashFlow"
   ],
-  "CMCSA - Cable & Other Pay Television Services": [
-   "InventoryNet"
-  ],
   "UNP - Railroads, Line-Haul Operating": [
-   "Goodwill",
-   "InventoryNet"
+   "Goodwill"
   ],
   "NEE - Electric Services": [
    "AccountsPayableCurrent",
    "FreeCashFlow"
-  ],
-  "BKNG - Transportation Services": [
-   "InventoryNet"
   ]
  },
- "Wholesale and Retail": {
-  "COST - Retail-Variety Stores": [
-   "AccountsReceivableNet"
-  ],
-  "MCD - Retail-Eating  Places": [
-   "AccountsReceivableNet"
-  ],
-  "LOW - Retail-Lumber & Other Building Materials Dealers": [
-   "AccountsReceivableNet"
-  ]
- },
+ "Wholesale and Retail": {},
  "Banking and Finance": {
   "BRK-B - Fire, Marine & Casualty Insurance": [
    "AccountsPayableCurrent",
@@ -333,27 +315,12 @@
   ]
  },
  "Services": {
-  "META - Services-Computer Programming, Data Processing, Etc.": [
-   "InventoryNet",
-   "ShortTermBorrowings"
-  ],
   "V - Services-Business Services, NEC": [
    "EarningsPerShareDiluted"
   ],
-  "MA - Services-Business Services, NEC": [
-   "InventoryNet"
-  ],
-  "ADBE - Services-Prepackaged Software": [
-   "InventoryNet"
-  ],
-  "ACN - Services-Business Services, NEC": [
-   "InventoryNet",
-   "LongTermDebt"
-  ],
   "NFLX - Services-Video Tape Rental": [
    "AccountsReceivableNet",
-   "Goodwill",
-   "InventoryNet"
+   "Goodwill"
   ],
   "PDD - Services-Business Services, NEC": [
    "AccountsReceivableNet",
@@ -361,15 +328,6 @@
    "LongTermDebt",
    "ShortTermBorrowings",
    "IncomeTaxesPaidNet"
-  ],
-  "INTU - Services-Prepackaged Software": [
-   "InventoryNet"
-  ],
-  "NOW - Services-Prepackaged Software": [
-   "InventoryNet"
-  ],
-  "UBER - Services-Business Services, NEC": [
-   "InventoryNet"
   ]
  },
  "Science and Healthcare": {},

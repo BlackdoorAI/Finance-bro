@@ -1,0 +1,12 @@
+{"Uncategorized": [],
+"Agriculture": [], 
+"Oil and Construction": [],
+"Household and Property consumables": [],
+"Manufacturing, Technology and Heavy Machinery": [],
+"Transportation and Communication": ["InventoryNet"],
+"Wholesale and Retail": ["AccountsReceivableNet"],
+"Banking and Finance" : [],
+"Services": ["InventoryNet"],
+"Science and Healthcare" : [],
+"Non-Operating" : []
+}
