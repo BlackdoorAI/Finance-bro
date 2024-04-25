@@ -3,7 +3,9 @@
  "Agriculture": {},
  "Oil and Construction": {
   "XOM - Petroleum Refining": [
-   "Goodwill"
+   "Goodwill",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit"
   ],
   "SHEL - Crude Petroleum & Natural Gas": [
    "EntityCommonStockSharesOutstanding",
@@ -151,6 +153,9 @@
    "OperatingIncomeLoss",
    "Revenues",
    "FreeCashFlow"
+  ],
+  "BA - Aircraft": [
+   "InventoryNet"
   ]
  },
  "Transportation and Communication": {
@@ -169,8 +174,16 @@
    "Revenues",
    "FreeCashFlow"
   ],
+  "CMCSA - Cable & Other Pay Television Services": [
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit"
+  ],
   "UNP - Railroads, Line-Haul Operating": [
    "Goodwill"
+  ],
+  "UPS - Trucking & Courier Services (No Air)": [
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit"
   ],
   "NEE - Electric Services": [
    "AccountsPayableCurrent",
@@ -188,7 +201,9 @@
    "AssetsNoncurrent",
    "PropertyPlantAndEquipmentNet",
    "ShortTermBorrowings",
-   "EarningsPerShareDiluted"
+   "CostOfGoodsAndServicesSold",
+   "EarningsPerShareDiluted",
+   "GrossProfit"
   ],
   "JPM - National Commercial Banks": [
    "AccountsPayableCurrent",
@@ -213,6 +228,8 @@
    "InventoryNet",
    "LiabilitiesCurrent",
    "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit",
    "FreeCashFlow"
   ],
   "WFC - National Commercial Banks": [
@@ -222,6 +239,8 @@
    "InventoryNet",
    "LiabilitiesCurrent",
    "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit",
    "FreeCashFlow"
   ],
   "HDB - Commercial Banks, NEC": [
@@ -230,7 +249,9 @@
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
-   "AssetsNoncurrent"
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit"
   ],
   "BX - Investment Advice": [
    "AccountsPayableCurrent",
@@ -267,6 +288,8 @@
    "InventoryNet",
    "LiabilitiesCurrent",
    "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit",
    "FreeCashFlow"
   ],
   "AXP - Finance Services": [
@@ -274,6 +297,7 @@
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
+   "AssetsNoncurrent",
    "CostOfGoodsAndServicesSold",
    "DepreciationAndAmortization",
    "GrossProfit"
@@ -283,7 +307,9 @@
    "AssetsCurrent",
    "InventoryNet",
    "LiabilitiesCurrent",
-   "AssetsNoncurrent"
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit"
   ],
   "GS - Security Brokers, Dealers & Flotation Companies": [
    "AccountsPayableCurrent",
@@ -295,6 +321,7 @@
    "AssetsNoncurrent",
    "CostOfGoodsAndServicesSold",
    "CostsAndExpenses",
+   "GrossProfit",
    "Revenues"
   ],
   "PLD - Real Estate Investment Trusts": [
@@ -313,7 +340,9 @@
  },
  "Services": {
   "V - Services-Business Services, NEC": [
-   "EarningsPerShareDiluted"
+   "CostOfGoodsAndServicesSold",
+   "EarningsPerShareDiluted",
+   "GrossProfit"
   ],
   "NFLX - Services-Video Tape Rental": [
    "AccountsReceivableNet",
