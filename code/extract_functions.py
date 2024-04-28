@@ -53,7 +53,7 @@ with open(r"..\other_pickle\cik.json","r") as file:
     file.close()
 
 def comp_load(ticker):
-    with open(f"C:\Programming\Python\Finance\EDGAR\companies\{ticker}.pkl", "rb")as file: #The path here is beacause it's meant to run in extract
+    with open(f"C:\Programming\Python\Finance\EDGAR\companies\{ticker}.pkl", "rb") as file: #The path here is beacause it's meant to run in extract
         company = pickle.load(file)
     return company
 
@@ -64,7 +64,7 @@ def example_save(data, name):
     
 #Manually figure out which measure is used with some company
 def company_wordsearch(ticker, word):
-    with open(f"..\companies\{ticker}.pkl", "rb")as file:
+    with open(f"..\\companies\{ticker}.pkl", "rb")as file:
         company = pickle.load(file)
     data = company.data
     compdict = {}
@@ -75,7 +75,7 @@ def company_wordsearch(ticker, word):
     for name, desc in compdict.items():
         if word.lower() in name.lower():   
             matching_elements[name] = desc 
-    with open(f"..\checkout\{ticker}.json", "w") as file:
+    with open(f"..\\checkout\{ticker}.json", "w") as file:
         json.dump(matching_elements, file, indent =1)
     formatted_json = json.dumps(matching_elements, indent=4)
     formatted_with_newlines = formatted_json.replace('\n', '\n\n')
@@ -125,7 +125,7 @@ def unitrun(dict, ticker, all=False, debug=False):
         for key,value in dict.items():
             units.append(key)
         units = list(set(units))
-        with open(f"units-checkout\\{ticker}.json", "w") as file:
+        with open(f"..\\units-checkout\\{ticker}.json", "w") as file:
             json.dump(units,file)
     return False, False
 
@@ -269,15 +269,14 @@ class Stock:
         # except Exception as e:
         #     print(f"During Initialization: {e}")
 
-    def time_init(self, standard_measures, static_start_threshold = 1, static_end_threshold = 1, dynamic_start_threshold = 1, dynamic_end_threshold = 1):
-        start_thresholds = {"static": static_start_threshold, "dynamic": dynamic_start_threshold}
-        end_thresholds = {"static": static_end_threshold, "dynamic": dynamic_end_threshold}
+    def time_init(self, standard_measures):
         #Also serves as a filter for the companies with wrong currencies
         #Check to see if already initialized with the measures
         missing = False
         category = get_category(self.sic)
-        self.start_year = {}
-        self.end_year = {}
+        self.overlap = {}
+        self.extreme_start = {}
+        self.extreme_end = {}
         self.date_range = {}
         measure_paths = {"static":{}, "dynamic":{}}
         needed_measures = []
@@ -294,17 +293,11 @@ class Stock:
                     missing = True
                     break
             if not missing:
-                #We do this because even if initialized with the same measures, thresholds could be different
-                start_index = math.ceil(start_thresholds[motion]*len(self.start_dates[motion])) -1 
-                end_index = -math.ceil(end_thresholds[motion]*len(self.end_dates[motion])) #While going through the list you lose data instead of gain so the index is different
-                self.start_year[motion] = pd.to_datetime(self.start_dates[motion][start_index], format=r"%Y-%m-%d")
-                self.end_year[motion] = pd.to_datetime(self.end_dates[motion][end_index], format=r"%Y-%m-%d")
-                self.date_range[motion] = pd.date_range(start=self.start_year[motion], end=self.end_year[motion])
                 flags[motion] = 1
                 continue
             # Get all the constituent measures needed through recursivefact
             for measure in standard_measures[motion]:
-                print(f"Getting {measure}")
+                # print(f"Getting {measure}")
                 #Make a copy.deepcopy if not working 
                 if measure in deprecate_conversion:
                     measure = deprecate_conversion[measure]
@@ -318,41 +311,36 @@ class Stock:
                     needed_measures += pathways["paths"][2]
                     date_dict[motion].append(pathways["paths"][1])
                     measures_and_intervals[motion][measure] = pathways["paths"][1]
-                    # if pathways["ignored"] != []:
-                    #     # print(f"{self.ticker}:{pathways}:{measure}")
-                    #     irrelevant_measures += pathways["ignored"]
                 else:
                     missing_measures[motion].append(measure)
             if measure_paths[motion] == {}:
                 return "del"  
-            overlap = calculate_overlap(date_dict[motion])   
-            # start_dates, end_dates = map(lambda x: sorted(list(x)),zip(*date_dict[motion]))
-            start_index = math.ceil(start_thresholds[motion]*len(start_dates)) -1 
-            end_index = -math.ceil(end_thresholds[motion]*len(end_dates))
-            self.start_dates[motion] = start_dates
-            self.end_dates[motion] = end_dates
-            self.start_year[motion] = pd.to_datetime(start_dates[start_index], format=r"%Y-%m-%d")
-            self.end_year[motion] = pd.to_datetime(end_dates[end_index], format=r"%Y-%m-%d")
-            self.date_range[motion] = pd.date_range(start=self.start_year[motion], end=self.end_year[motion])
-            if self.end_year[motion]< self.start_year[motion]:
-                success[motion] = 0
+            self.overlap[motion] = calculate_overlap(date_dict[motion])   
+            if self.overlap[motion] != []:
+                success[motion] = 1
             else:
                 success[motion] = 1
-            self.measures_and_intervals = measures_and_intervals
-        if flags["static"] and flags["dynamic"]:
+            dates = [item for sublist in date_dict[motion] for item in sublist]
+            if dates == []:
+                self.extreme_start[motion] = pd.Timestamp.now()
+                self.extreme_end[motion] = pd.Timestamp.now()
+            else:
+                start_dates, end_dates = zip(*dates) #map(lambda x: sorted(list(x)),
+                self.extreme_start[motion] = min(start_dates)
+                self.extreme_end[motion] = max(end_dates)
+
+        self.measures_and_intervals = measures_and_intervals
+        if flags["static"] and flags["dynamic"]: #If already initialized 
             return (flags["static"], flags["dynamic"])
-        #measure paths look like: 
         self.paths = measure_paths
         self.missing = missing_measures
         self.ignored = irrelevant_measures
+        self.date_dict = date_dict
         #remove duplicates
         needed_measures = list(set(needed_measures))
-        # for i in self.ignored:
-        #     needed_measures.remove(i)
         self.initialized_measures = standard_measures
-
         #Change the strings to datetime for the initialized measures
-        # Step 1: Flatten batches into a single DataFrame with an identifier
+        #Flatten batches into a single DataFrame with an identifier
         all_data = []
         for measure in needed_measures:
             if measure in deprecate_conversion:
@@ -361,7 +349,6 @@ class Stock:
             for datapoint in datapoints:
                 datapoint["batch_name"] = measure  # Add identifier
                 all_data.append(datapoint)
-
         df = pd.DataFrame(all_data)
         df['filed'] = pd.to_datetime(df['filed'], format='%Y-%m-%d')
         df['end'] = pd.to_datetime(df['end'], format='%Y-%m-%d')
@@ -387,7 +374,7 @@ class Stock:
         
     async def price_init(self,semaphore):
         #Get the price and set the self.price
-        self.fullprice = await yahoo_fetch(self.ticker,self.start_year, self.end_year, semaphore, RETRIES, START_RETRY_DELAY)
+        self.fullprice = await yahoo_fetch(self.ticker, self.extreme_start, self.extreme_end, semaphore, RETRIES, START_RETRY_DELAY)
         if type(self.fullprice) == int:
             return 0
         Price = self.fullprice[["close", "adjclose"]].copy()
@@ -395,7 +382,7 @@ class Stock:
         self.price = Price.ffill().bfill()
         return 1 
     
-    def fact(self, measure, intervals = None, converted=True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False):
+    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False):
         """  
         If date_gather, then it returns a dataframe to allow recursive_fact to get the date.
         Returns a dataframe that has rows indexed row_delta away, with lookbehind columns that are column_delta away.
@@ -423,18 +410,19 @@ class Stock:
                 return "del"
             reshaped, intervals, dynamic = reshape(measure, point_list, self.ticker, converted=False)
             return intervals
-        self.converted_data = []
         if measure in self.converted_data:
             data= self.converted_data[measure]
+            converted= True
         elif measure in irrelevants[get_category(self.sic)]:
-            base_dates = pd.date_range(start=self.end_year["static"], end=self.start_year["static"], freq=-row_delta)
+            base_dates = pd.date_range(start=self.extreme_end["static"], end=self.extreme_start["static"], freq=-row_delta)
             frame = pd.DataFrame(index =base_dates, columns = [f"{measure}-{i}" for i in range(0,lookbehind)])
             frame = frame.infer_objects()
             frame.fillna(0,inplace = True)
             frame = frame.iloc[::-1]
             return frame, "ignored"
-        elif converted == False and measure in self.data:
+        elif measure in self.data:
             data = self.data[measure]
+            converted = False
         else:
             # print(f"{self.ticker}: Data not converted or available for {measure}")
             return pd.DataFrame(), None
@@ -554,7 +542,7 @@ def operate(frames, operation, approx):
         if operation == "add":
             pass 
 
-def path_selector(comp, measure, path, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, reshape_approx = False):
+def path_selector(comp, measure, path, intervals, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, reshape_approx = False):
     """
     Takes in the desired path to the data and outputs the data
     New recursive_fact
@@ -564,7 +552,7 @@ def path_selector(comp, measure, path, row_delta = pd.Timedelta(days=1), column_
     #[{'Assets': (True, ('2008-09-27', '2023-12-30'))]}, ({'LiabilitiesAndStockholdersEquity': (True, ('2008-09-27', '2023-12-30'))}), ({'add': {'AssetsCurrent': (True,('2008-09-27', '2023-12-30')), 'AssetsNoncurrent': {'sub': {'Assets': True, 'AssetsCurrent': True}}}})]
     for root, tree in path.items():
         if tree == True:              
-            value, unit = comp.fact(root, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            value, unit = comp.fact(root, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
             value = frame_rename(value,measure)
             return value, unit
         #Concat path
@@ -843,9 +831,9 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
         return None
     if dates == "ignored":
         if depth==0:
-            paths.append(({measure:True},(pd.Timestamp(year=1970, month=1, day=1), pd.Timestamp.now()),[])) #Just to make path seeking better
+            paths.append(({measure:True},[(pd.Timestamp(year=1970, month=1, day=1), pd.Timestamp.now())],[])) #Just to make path seeking better
         else:   
-            paths.append((True,(pd.Timestamp(year=1970, month=1, day=1), pd.Timestamp.now()),[]))
+            paths.append((True,[(pd.Timestamp(year=1970, month=1, day=1), pd.Timestamp.now())],[]))
         path_date["ignored"].append(measure)
     elif dates != None:
         if depth==0:
@@ -962,10 +950,10 @@ def get_category(sic):
     return "Uncategorized"
 
 #(comp, measure, depth=0, approx = True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, printout =False, date_gather= False
-def acquire_frame(comp, measures:dict, available, indicator_frame, static_start_threshold = 1, static_end_threshold = 1, dynamic_start_threshold = 1, dynamic_end_threshold = 1, reshape_approx= True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365), static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91),  lookbehind =5, annual=False):
+def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_approx= True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365), static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91),  lookbehind =5, annual=False):
     #Get a dataframe from the saved data of some stock 
     #Returns 0 in all the columns where data is missing
-    comp.time_init(measures, static_start_threshold, static_end_threshold , dynamic_start_threshold , dynamic_end_threshold)
+    comp.time_init(measures)
     catg = get_category(comp.sic)
     frames_dict = {"static":[], "dynamic":[]}
     unit_dict = {"static":[], "dynamic":[]}
@@ -977,7 +965,8 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, static_start_
             if measure not in comp.missing[motion]:
                 print(f"{comp.ticker} Getting {measure}")
                 print(comp.paths[motion][measure][0])
-                data, unit = path_selector(comp, measure, comp.paths[motion][measure][0], row_delta , column_delta , static_tolerance, dynamic_row_delta,dynamic_tolerance, lookbehind, annual, reshape_approx)
+                intervals = comp.measures_and_intervals[motion]
+                data, unit = path_selector(comp, measure, comp.paths[motion][measure][0], intervals, row_delta , column_delta , static_tolerance, dynamic_row_delta,dynamic_tolerance, lookbehind, annual, reshape_approx)
                 data.name = measure
                 frames_dict[motion].append(data)
                 unit_dict[motion].append(unit)
@@ -1016,7 +1005,7 @@ async def async_task(ticker, client, semaphore_edgar, semaphore_yahoo, measures)
         succesful_price = await stock.price_init(semaphore_yahoo)
     else:
         succesful_price = 0
-    with open(f'companies\{ticker}.pkl', 'wb') as file:
+    with open(f'..\\companies\{ticker}.pkl', 'wb') as file:
         pickle.dump(stock,file)
     success = stock.success
     del stock
