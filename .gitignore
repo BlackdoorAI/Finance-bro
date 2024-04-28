@@ -15,3 +15,5 @@ frames/
 extract.txt
 
 goodwill.txt
+
+__pycache__
