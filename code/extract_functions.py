@@ -1,52 +1,70 @@
+import httpx
+from fredapi import Fred
+import numpy as np
+import json
+import pandas as pd
+import pickle
+# We use normal datetime for fred info and pandas datetime for data
+from datetime import datetime
+import math
+import os
+from functools import lru_cache
+from conversions import *
+from net_stuff import *
+from reshape import *
+
 FACTS_PATH = r"C:\Edgar_data"
 SUBMISSIONS_PATH = r"C:\Submissions_data"
 
-#Unavailable stuff
-with open(r'other_pickle\unavailable.json', 'r') as file:
+fred = Fred(api_key='0c34c4dd2fd6943f6549f1c990a8a0f0') 
+TIMEOUT = 8
+RETRIES = 2
+START_RETRY_DELAY = 3
+#Easily load a company into a variable
+
+with open(r'..\other_pickle\unavailable.json', 'r') as file:
         Unavailable_Measures = json.load(file)
 
 #Lookup table for the undeprecated version of a measure
-with open(r"other_pickle\deprecated_to_current.json", "r") as file:
+with open(r"..\other_pickle\deprecated_to_current.json", "r") as file:
     deprecate_conversion = json.load(file)
     file.close()
 
 #Categories
-with open(r"categories\categories.json", "r") as file:
+with open(r"..\categories\categories.json", "r") as file:
     categories = json.load(file)
 
 #Irrelevants
-with open(r"categories\category_measures_irrelevant.json") as file:
+with open(r"..\categories\category_measures_irrelevant.json") as file:
     irrelevants = json.load(file)
-
-#Make sure the necessary folders exist
-for category, num_range in categories.items():
-    os.makedirs(f"companies_data\static\{category}", exist_ok=True)
-    os.makedirs(f"companies_data\dynamic\{category}", exist_ok=True)
-    os.makedirs(f"companies_data_missing\{category}", exist_ok=True)
-
-for path in ["checkout", "companies", "companies_data", "companies_data_missing", "units-checkout"]:
-    os.makedirs(path, exist_ok=True)
-
-with open("categories\category_measures.json", "r") as file:
+with open(r"..\categories\category_measures.json", "r") as file:
     category_measures = json.load(file)
-
 #The first entry date into the EDGAR database
 START = datetime.strptime('1993-01-01', r"%Y-%m-%d")
 
-#Easily load a company into a variable
+#Headers for EDGAR call
+headers = {
+    "User-Agent":"ficakc@seznam.cz",
+    "Accept-Encoding":"gzip, deflate",
+}
+
+with open(r"..\other_pickle\cik.json","r") as file:
+    cikdata = json.load(file)
+    file.close()
+
 def comp_load(ticker):
-    with open(f"companies\{ticker}.pkl", "rb")as file:
+    with open(f"C:\Programming\Python\Finance\EDGAR\companies\{ticker}.pkl", "rb")as file: #The path here is beacause it's meant to run in extract
         company = pickle.load(file)
     return company
 
 def example_save(data, name):
-    with open(f"examples/{name}.json", "w") as file:
+    with open(f"C:\Programming\Python\Finance\EDGAR\examples/{name}.json", "w") as file: #The path here is beacause it's meant to run in extract
         json.dump(data,file,indent=1)
     print("Saved")
     
 #Manually figure out which measure is used with some company
 def company_wordsearch(ticker, word):
-    with open(f"companies\{ticker}.pkl", "rb")as file:
+    with open(f"..\companies\{ticker}.pkl", "rb")as file:
         company = pickle.load(file)
     data = company.data
     compdict = {}
@@ -57,7 +75,7 @@ def company_wordsearch(ticker, word):
     for name, desc in compdict.items():
         if word.lower() in name.lower():   
             matching_elements[name] = desc 
-    with open(f"checkout\{ticker}.json", "w") as file:
+    with open(f"..\checkout\{ticker}.json", "w") as file:
         json.dump(matching_elements, file, indent =1)
     formatted_json = json.dumps(matching_elements, indent=4)
     formatted_with_newlines = formatted_json.replace('\n', '\n\n')
@@ -201,7 +219,7 @@ headers = {
 # cik_url =  "https://www.sec.gov/files/company_tickers.json"
 # cikdata = requests.get(cik_url, headers=headers).json()
 
-with open(r"other_pickle\cik.json","r") as file:
+with open(r"..\other_pickle\cik.json","r") as file:
     cikdata = json.load(file)
     file.close()
     
@@ -378,12 +396,13 @@ class Stock:
         self.price = Price.ffill().bfill()
         return 1 
     
-    def fact(self, measure, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False):
+    def fact(self, measure, intervals = None, converted=True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False):
         """  
         If date_gather, then it returns a dataframe to allow recursive_fact to get the date.
         Returns a dataframe that has rows indexed row_delta away, with lookbehind columns that are column_delta away.
         If the data is dynamic then the row and column deltas are fixed.
         Dynamic tolerance is how much into the future the price we are predicting is.
+        If intervals is None, that means get as much as possible
         """
         #Propagate the 0 
         if self.data == 0:
@@ -405,12 +424,9 @@ class Stock:
                 return "del"
             reshaped, intervals, dynamic = reshape(measure, point_list)
             return intervals
-        
-        #Get the index dates for the datpoints for measure
+        self.converted_data = []
         if measure in self.converted_data:
             data= self.converted_data[measure]
-
-        #If the measure doesn't make sense for the company's category, replace all of the datapoints with 0
         elif measure in irrelevants[get_category(self.sic)]:
             base_dates = pd.date_range(start=self.end_year["static"], end=self.start_year["static"], freq=-row_delta)
             frame = pd.DataFrame(index =base_dates, columns = [f"{measure}-{i}" for i in range(0,lookbehind)])
@@ -418,73 +434,79 @@ class Stock:
             frame.fillna(0,inplace = True)
             frame = frame.iloc[::-1]
             return frame, "ignored"
+        elif measure in self.data:
+            data = self.data[measure]
         else:
             # print(f"{self.ticker}: Data not converted or available for {measure}")
             return pd.DataFrame(), None
-        reshaped, intervals, dynamic = reshape(measure, data, annual, reshape_approx)
-        if dynamic:
-            motion = "dynamic"
-        else:
-            motion = "static"
-        if dynamic == True:
-            row_delta = dynamic_row_delta
-            column_delta = pd.Timedelta(days=95)
-        tolerance = dynamic_tolerance * int(dynamic) + static_tolerance * (int(not dynamic))
-        if motion == "static":
-            dates = list(reshaped.keys())
-            base_dates = pd.date_range(start=self.end_year[motion], end=self.start_year[motion], freq=-row_delta)
-            i_values = np.arange(lookbehind)  # An array [0, 1, ..., lookbehind-1]
-            adjustments = i_values * column_delta
-            # Broadcasted subtraction: for each date in base_dates, subtract each value in adjustments
-            row_dates = np.subtract.outer(base_dates, adjustments)
-            dimensions = row_dates.shape
-            flat_row_dates = row_dates.flatten()
-            date_series = pd.Series(flat_row_dates)
-            # Use apply to run closest_date on each date
-            results_series = date_series.apply(lambda x: closest_date(tuple(dates), x, self.ticker, fallback=True))  # m rows and n columns, replace with actual values
-            row_indexes = results_series.to_numpy().reshape(dimensions)
-            row_indexes = pd.DataFrame(row_indexes, index =base_dates)
-            #each item is a tuple of dates 
-            frame_dict = {row_index:[] for row_index in base_dates}
-        else:
-            timestamps = list(reshaped.keys()) 
-            index_length = len(timestamps) 
-            rows = [zip(timestamps[0:lookbehind], [None] + timestamps[0:lookbehind-1])]
-            for i in range(lookbehind+1, index_length):
-                # Extract the window of n elements
-                window = zip(timestamps[i-lookbehind:i], timestamps[i-1-lookbehind:i-1])
-                # Append the window to the rows list
-                rows.append(window)
+        #Get the index dates for the datpoints for measure
+        #If the measure doesn't make sense for the company's category, replace all of the datapoints with 0
+        reshaped, _, dynamic = reshape(measure, data, annual, reshape_approx, converted=converted) # _ is intervals, if the data has not been converted in the init, it will be here
+        for i ,interval in enumerate(intervals): #To save compute we only get the data that we really need, could be intervals with gaps
+            data_start, data_end = interval
+            if dynamic:
+                row_delta = dynamic_row_delta
+                column_delta = pd.Timedelta(days=95)
+            tolerance = dynamic_tolerance * int(dynamic) + static_tolerance * (int(not dynamic))
+            if not dynamic: #static 
+                dates = list(reshaped.keys())
+                base_dates = pd.date_range(start=data_start, end=data_end, freq=-row_delta)
+                i_values = np.arange(lookbehind)  # An array [0, 1, ..., lookbehind-1]
+                adjustments = i_values * column_delta
+                # Broadcasted subtraction: for each date in base_dates, subtract each value in adjustments
+                row_dates = np.subtract.outer(base_dates, adjustments)
+                dimensions = row_dates.shape
+                flat_row_dates = row_dates.flatten()
+                date_series = pd.Series(flat_row_dates)
+                # Use apply to run closest_date on each date
+                results_series = date_series.apply(lambda x: closest_date(tuple(dates), x, self.ticker, fallback=True))  # m rows and n columns, replace with actual values
+                row_indexes = results_series.to_numpy().reshape(dimensions)
+                row_indexes = pd.DataFrame(row_indexes, index =base_dates)
+                #each item is a tuple of dates 
+                frame_dict = {row_index:[] for row_index in base_dates}
+            else:
+                timestamps = list(reshaped.keys()) 
+                timestamps = [timestamp for timestamp in timestamps if (data_start <= timestamp <=data_end)] #filter for the interval
+                index_length = len(timestamps) 
+                rows = [zip(timestamps[0:lookbehind], [None] + timestamps[0:lookbehind-1])]
+                for i in range(lookbehind+1, index_length):
+                    # Extract the window of n elements
+                    window = zip(timestamps[i-lookbehind:i], timestamps[i-1-lookbehind:i-1])
+                    # Append the window to the rows list
+                    rows.append(window)
 
-            # Convert the list of rows into a DataFrame
-            row_indexes = pd.DataFrame(rows, index = timestamps[lookbehind:])
-            frame_dict = {row_index:[] for row_index in timestamps[lookbehind:]}
-            
-        for row_index, row in row_indexes.iterrows():
-            barrier = row_index + tolerance
-            for index_tuple in row: 
-                index, fallback_index = index_tuple
-                nearest_filed = pd.Timestamp.min
-                uptodate = {"val": np.nan}
-                if index!= None:
-                    for value in reshaped[index]:  
-                        if nearest_filed < value["filed"] <= barrier:
-                            uptodate = value
-                            nearest_filed = value["filed"]
-                if np.isnan(uptodate["val"]):
-                    if fallback_index != None:
-                        for value in reshaped[fallback_index]:  
+                # Convert the list of rows into a DataFrame
+                row_indexes = pd.DataFrame(rows, index = timestamps[lookbehind:])
+                frame_dict = {row_index:[] for row_index in timestamps[lookbehind:]}
+                
+            for row_index, row in row_indexes.iterrows():
+                barrier = row_index + tolerance
+                for index_tuple in row: 
+                    index, fallback_index = index_tuple
+                    nearest_filed = pd.Timestamp.min
+                    uptodate = {"val": np.nan}
+                    if index!= None:
+                        for value in reshaped[index]:  
                             if nearest_filed < value["filed"] <= barrier:
                                 uptodate = value
                                 nearest_filed = value["filed"]
-                frame_dict[row_index].append(uptodate["val"])
-        frame = pd.DataFrame.from_dict(frame_dict, orient='index')
-        if frame.empty:
-            print(f"{measure} inelligible for {self.ticker}")
-            return frame, None
-        frame = frame.iloc[::-1]
-        frame.columns = [f"{measure}-{i}" for i in range(0,lookbehind)]
-        return frame, "Some_unit"   
+                    if np.isnan(uptodate["val"]):
+                        if fallback_index != None:
+                            for value in reshaped[fallback_index]:  
+                                if nearest_filed < value["filed"] <= barrier:
+                                    uptodate = value
+                                    nearest_filed = value["filed"]
+                    frame_dict[row_index].append(uptodate["val"])
+            frame = pd.DataFrame.from_dict(frame_dict, orient='index')
+            if i == 1:
+                total_frame = frame
+            if i != 0:
+                total_frame.combine_first(frame)
+            if frame.empty:
+                print(f"{measure} inelligible for {self.ticker}")
+        total_frame = total_frame.iloc[::-1]
+        total_frame.columns = [f"{measure}-{i}" for i in range(0,lookbehind)]
+        return total_frame, "Some_unit"   
         # except KeyError as e:
         #     print(f"in fact keyerror: {e}")
         #     print(f"Fact {measure} not available for {self.ticker}.")
@@ -789,7 +811,8 @@ def analyze_structure(structure, depth=1):
         return max_depth + total_elements
     return max_depth, total_elements
 
-def recursive_date_gather(comp, measure, depth=0, path_date=None, blind = False, approx = True, printout =False):
+#Used: {"conversion":["bla", "blabla"], "addition":[blabla]}
+def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True, used=None, printout =False):
     #path = ("first_step", "second_step"...)
     #The whole thing returns the best path with the date that you get
     #Individual calls return the best dates and the measures needed to get it as a tuple
@@ -800,8 +823,11 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, blind = False,
     #We create the paths at the top and not at the bottom
     #The needed measures will be included in the whole path
     paths = []
-    if path_date is None and depth==0:
-        path_date = {"del": False, "paths":[], "ignored":[]}
+    if depth ==0:
+        if path_date is None:
+            path_date = {"del": False, "paths":[], "ignored":[]}
+        if used is None:
+            used = {"conversion":[],"approx_conversion":[],"add":[],"approx_add":[],"sub":[]}
     if depth>5:
         return None
     if printout:
@@ -825,83 +851,93 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, blind = False,
             paths.append((True,dates,[measure]))
         
     if measure in measure_conversion:
-        for replacement in measure_conversion[measure]:
-            path = recursive_date_gather(comp, replacement, depth+1, path_date, blind, approx, printout)
-            # path = path_finder(path)
-            if path != None:
-                paths.append(({replacement:path[0]},path[1],path[2]))
-
-    if measure in additive_conversion:
-        branches = []
-        parts = []
-        if additive_conversion[measure] != []:
-            abort = False
-            for part in additive_conversion[measure]:
-                if abort == False:
-                    path = recursive_date_gather(comp, part,depth+1,path_date, True, approx, printout) 
-                    if path == None:
-                        if part not in optional:
-                            abort = True
-                        continue
-                    else:
-                        branches.append(path)
-                        parts.append(part)
-            if not abort:
-                stuff = path_finder(branches,True)
-                if stuff:
-                    path, interval, needed = stuff
-                    if depth == 0:
-                        paths.append(({measure:{"add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
-                    else:
-                        paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))
-
-    if measure in subtract_conversion:
-        path_add = recursive_date_gather(comp,subtract_conversion[measure][0],depth+1, path_date, True, approx, printout)
-        path_sub = recursive_date_gather(comp,subtract_conversion[measure][1],depth+1, path_date, True, approx, printout)
-        if path_add != None and path_sub != None:
-            stuff = path_finder([path_add, path_sub], True)
-            if stuff:
-                (path_add,path_sub), interval, needed = stuff
-                if depth == 0:
-                    paths.append(({measure:{"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}}},interval, needed))
-                else:
-                    paths.append(({"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}},interval, needed))
-
-    if approx:
-        if measure in approximate_measure_conversion:
-            for replacement in approximate_measure_conversion[measure]:
-                path = recursive_date_gather(comp, replacement, depth+1, path_date, blind, approx, printout)
+        if measure not in used["conversion"]:
+            used["conversion"] += measure
+            for replacement in measure_conversion[measure]:
+                path = recursive_date_gather(comp, replacement, depth+1, path_date, approx, used, printout)
                 # path = path_finder(path)
                 if path != None:
                     paths.append(({replacement:path[0]},path[1],path[2]))
-                    
-        if measure in approximate_additive_conversion:
+
+    if measure in additive_conversion:
+        if measure not in used["add"]:
+            used["add"] += measure
             branches = []
-            parts = []  #We need to record which parts we actuall used
-            optionals = 0 #To calc the percentage of optionals used
-            approxes, parts_needed = approximate_additive_conversion[measure]
-            if approxes != []:
+            parts = []
+            if additive_conversion[measure] != []:
                 abort = False
-                for part in approxes:
+                for part in additive_conversion[measure]:
                     if abort == False:
-                        path = recursive_date_gather(comp, part,depth+1,path_date, True, approx, printout) 
-                        if path == None: #Check if start is before end path[1][0] > path[1][1]
+                        path = recursive_date_gather(comp, part,depth+1,path_date, approx, used, printout) 
+                        if path == None:
                             if part not in optional:
                                 abort = True
-                            else:
-                                optionals+=1
                             continue
                         else:
                             branches.append(path)
                             parts.append(part)
-            if not abort and (len(approxes)-optionals) >= parts_needed: #To prevent ridiculous approxes 
-                stuff = path_finder(branches,True)
+                if not abort:
+                    stuff = path_finder(branches,True)
+                    if stuff:
+                        path, interval, needed = stuff
+                        if depth == 0:
+                            paths.append(({measure:{"add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
+                        else:
+                            paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))
+
+    if measure in subtract_conversion:
+        if measure not in used["sub"]:
+            used["sub"] += measure
+            path_add = recursive_date_gather(comp,subtract_conversion[measure][0],depth+1, path_date, approx, used, printout)
+            path_sub = recursive_date_gather(comp,subtract_conversion[measure][1],depth+1, path_date, approx, used, printout)
+            if path_add != None and path_sub != None:
+                stuff = path_finder([path_add, path_sub], True)
                 if stuff:
-                    path, interval, needed = stuff
+                    (path_add,path_sub), interval, needed = stuff
                     if depth == 0:
-                        paths.append(({measure:{"add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
+                        paths.append(({measure:{"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}}},interval, needed))
                     else:
-                        paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))
+                        paths.append(({"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}},interval, needed))
+
+    if approx:
+        if measure in approximate_measure_conversion:
+            if measure not in used["approx_conversion"]:
+                used["approx_conversion"] += measure
+                for replacement in approximate_measure_conversion[measure]:
+                    path = recursive_date_gather(comp, replacement, depth+1, path_date, approx, used, printout)
+                    # path = path_finder(path)
+                    if path != None:
+                        paths.append(({replacement:path[0]},path[1],path[2]))
+                    
+        if measure in approximate_additive_conversion:
+            if measure not in used["approx_add"]:
+                used["approx_add"] += measure
+                branches = []
+                parts = []  #We need to record which parts we actuall used
+                optionals = 0 #To calc the percentage of optionals used
+                approxes, parts_needed = approximate_additive_conversion[measure]
+                if approxes != []:
+                    abort = False
+                    for part in approxes:
+                        if abort == False:
+                            path = recursive_date_gather(comp, part,depth+1,path_date, approx, used, printout) 
+                            if path == None: #Check if start is before end path[1][0] > path[1][1]
+                                if part not in optional:
+                                    abort = True
+                                else:
+                                    optionals+=1
+                                continue
+                            else:
+                                branches.append(path)
+                                parts.append(part)
+                if not abort and (len(approxes)-optionals) >= parts_needed: #To prevent ridiculous approxes 
+                    stuff = path_finder(branches,True)
+                    if stuff:
+                        path, interval, needed = stuff
+                        if depth == 0:
+                            paths.append(({measure:{"add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
+                        else:
+                            paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))
                         
     if depth ==0:
         if path_date["del"] == True:
