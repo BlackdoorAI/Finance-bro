@@ -1,13 +1,21 @@
 import numpy as np
 import pandas as pd
+import os
+import pickle
 from conversions import *
+
 
 def timediff(a,b):
     return abs((a-b).days)
 
-def reshape(measure, datapoint_list, annual = False, approx = False, converted = False):
+def reshape(measure, datapoint_list, ticker, annual = False, approx = False, converted = False):
     #Reshapes the datapoint list so that its indexed by end and each item retains its attrs
     #Designed to be used after data is converted to datetime
+    #If we have it precomputed we just use it
+    if os.path.exists(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl"):
+        with open(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl", "rb") as file:
+            trinity = pickle.load(file)
+            return trinity
     dynamic = True
     if "start" not in datapoint_list[0]: 
         if measure not in dynamic_fuckers:
@@ -154,5 +162,7 @@ def reshape(measure, datapoint_list, annual = False, approx = False, converted =
         i+=1
     if interval_start is not None:
         intervals.append((interval_start, reshaped[-1][0]))
-
+    #Since we did not have it precomputed, we save it before we return it
+    with open(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl", "wb") as file:
+        pickle.dump((reshaped_data, intervals, dynamic), file)
     return reshaped_data, intervals, dynamic

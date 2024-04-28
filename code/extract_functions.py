@@ -262,7 +262,7 @@ class Stock:
                         self.foreign = True
             self.start_dates = {}
             self.end_dates = {}
-            self.measures_and_dates = {}
+            self.measures_and_intervals = {}
             self.success = self.time_init(standard_measures)
         except FileNotFoundError:
             self.success = "del"
@@ -281,7 +281,7 @@ class Stock:
         self.date_range = {}
         measure_paths = {"static":{}, "dynamic":{}}
         needed_measures = []
-        measures_and_dates = {"static":[], "dynamic":[]}
+        measures_and_intervals = {"static":{}, "dynamic":{}}
         date_dict = {"static":[], "dynamic":[]}
         #Both static and dynamic time init
         missing_measures = {"static":[], "dynamic":[]}
@@ -317,7 +317,7 @@ class Stock:
                     measure_paths[motion].update({measure: (pathways["paths"][0], pathways["paths"][1])})
                     needed_measures += pathways["paths"][2]
                     date_dict[motion].append(pathways["paths"][1])
-                    measures_and_dates[motion].append((measure, pathways["paths"][1]))
+                    measures_and_intervals[motion][measure] = pathways["paths"][1]
                     # if pathways["ignored"] != []:
                     #     # print(f"{self.ticker}:{pathways}:{measure}")
                     #     irrelevant_measures += pathways["ignored"]
@@ -326,20 +326,19 @@ class Stock:
             if measure_paths[motion] == {}:
                 return "del"  
             overlap = calculate_overlap(date_dict[motion])   
-            # # start_dates, end_dates = map(lambda x: sorted(list(x)),zip(*date_dict[motion]))
-            # start_index = math.ceil(start_thresholds[motion]*len(start_dates)) -1 
-            # end_index = -math.ceil(end_thresholds[motion]*len(end_dates))
-            # self.start_dates[motion] = start_dates
-            # self.end_dates[motion] = end_dates
-            # self.start_year[motion] = pd.to_datetime(start_dates[start_index], format=r"%Y-%m-%d")
-            # self.end_year[motion] = pd.to_datetime(end_dates[end_index], format=r"%Y-%m-%d")
-            # self.date_range[motion] = pd.date_range(start=self.start_year[motion], end=self.end_year[motion])
-            # if self.end_year[motion]< self.start_year[motion]:
-            #     success[motion] = 0
-            # else:
-            #     success[motion] = 1
-            # self.measures_and_dates = measures_and_dates
-        return (1,1)
+            # start_dates, end_dates = map(lambda x: sorted(list(x)),zip(*date_dict[motion]))
+            start_index = math.ceil(start_thresholds[motion]*len(start_dates)) -1 
+            end_index = -math.ceil(end_thresholds[motion]*len(end_dates))
+            self.start_dates[motion] = start_dates
+            self.end_dates[motion] = end_dates
+            self.start_year[motion] = pd.to_datetime(start_dates[start_index], format=r"%Y-%m-%d")
+            self.end_year[motion] = pd.to_datetime(end_dates[end_index], format=r"%Y-%m-%d")
+            self.date_range[motion] = pd.date_range(start=self.start_year[motion], end=self.end_year[motion])
+            if self.end_year[motion]< self.start_year[motion]:
+                success[motion] = 0
+            else:
+                success[motion] = 1
+            self.measures_and_intervals = measures_and_intervals
         if flags["static"] and flags["dynamic"]:
             return (flags["static"], flags["dynamic"])
         #measure paths look like: 
@@ -422,7 +421,7 @@ class Stock:
             point_list, unit = unitrun(data["units"], self.ticker)
             if point_list == False:
                 return "del"
-            reshaped, intervals, dynamic = reshape(measure, point_list)
+            reshaped, intervals, dynamic = reshape(measure, point_list, self.ticker, converted=False)
             return intervals
         self.converted_data = []
         if measure in self.converted_data:
@@ -434,14 +433,14 @@ class Stock:
             frame.fillna(0,inplace = True)
             frame = frame.iloc[::-1]
             return frame, "ignored"
-        elif measure in self.data:
+        elif converted == False and measure in self.data:
             data = self.data[measure]
         else:
             # print(f"{self.ticker}: Data not converted or available for {measure}")
             return pd.DataFrame(), None
         #Get the index dates for the datpoints for measure
         #If the measure doesn't make sense for the company's category, replace all of the datapoints with 0
-        reshaped, _, dynamic = reshape(measure, data, annual, reshape_approx, converted=converted) # _ is intervals, if the data has not been converted in the init, it will be here
+        reshaped, _, dynamic = reshape(measure, data, self.ticker, annual, reshape_approx, converted=converted) # _ is intervals, if the data has not been converted in the init, it will be here
         for i ,interval in enumerate(intervals): #To save compute we only get the data that we really need, could be intervals with gaps
             data_start, data_end = interval
             if dynamic:
@@ -450,7 +449,9 @@ class Stock:
             tolerance = dynamic_tolerance * int(dynamic) + static_tolerance * (int(not dynamic))
             if not dynamic: #static 
                 dates = list(reshaped.keys())
-                base_dates = pd.date_range(start=data_start, end=data_end, freq=-row_delta)
+                base_dates = pd.date_range(start=data_end, end=data_start, freq=-row_delta) #Inverted start and end to keep the correct order
+                if base_dates.empty:
+                    print("The interval doesn't fit with frequency")
                 i_values = np.arange(lookbehind)  # An array [0, 1, ..., lookbehind-1]
                 adjustments = i_values * column_delta
                 # Broadcasted subtraction: for each date in base_dates, subtract each value in adjustments
@@ -498,12 +499,14 @@ class Stock:
                                     nearest_filed = value["filed"]
                     frame_dict[row_index].append(uptodate["val"])
             frame = pd.DataFrame.from_dict(frame_dict, orient='index')
-            if i == 1:
-                total_frame = frame
-            if i != 0:
-                total_frame.combine_first(frame)
             if frame.empty:
                 print(f"{measure} inelligible for {self.ticker}")
+                total_frame = frame
+                total_frame.columns = [f"{measure}-{i}" for i in range(0,lookbehind)]
+            elif i == 0:
+                total_frame = frame
+            elif i != 0:
+                total_frame.combine_first(frame)
         total_frame = total_frame.iloc[::-1]
         total_frame.columns = [f"{measure}-{i}" for i in range(0,lookbehind)]
         return total_frame, "Some_unit"   
@@ -729,7 +732,7 @@ def path_finder(paths, constituent=False):
                 path, (start, end), needed = route
                 #When there is no candidate we search for one and only when there is an eligible candidate do we try to replace it
                 if not best:
-                    if start <= current_end and end > current_end:
+                    if (start <= current_end + pd.Timedelta(days=4)) and end > current_end: #Cut some slack for gaps worth a day
                         idx = k
                         best = route
                         best_start = start
@@ -737,7 +740,7 @@ def path_finder(paths, constituent=False):
                         best_needed = needed
                     else:
                         continue
-                elif start <= current_end:
+                elif (start <= current_end + pd.Timedelta(days=4)):
                     if end > best_end:
                         idx = k
                         best = route
@@ -759,7 +762,7 @@ def path_finder(paths, constituent=False):
                 for i, route in enumerate(sorted_paths[idx+2:], start=idx+2):
                     path, (start, end), needed = route
                     if start == first_start:    
-                        if start <= first_end and end > first_end or (end == first_end and (len(needed)<len(first_needed))): #or (len(needed)==len(best[2]) and analyze_structure(route) < analyze_structure(best)
+                        if (start <= first_end + pd.Timedelta(days=4)) and end > first_end or (end == first_end and (len(needed)<len(first_needed))): #or (len(needed)==len(best[2]) and analyze_structure(route) < analyze_structure(best)
                             first_path = path
                             first_start = start
                             first_end = end
