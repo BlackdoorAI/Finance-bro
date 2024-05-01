@@ -266,7 +266,11 @@ class Stock:
                         self.foreign = True
             # self.start_dates = {}
             # self.end_dates = {}
-            self.measures_and_intervals = {}
+            self.measures_and_intervals = {"static":{}, "dynamic":{}}
+            self.measure_paths = {"static":{}, "dynamic":{}}
+            self.missing = {"static":[], "dynamic":[]}
+            self.ignored = []
+            self.date_dict = {"static":[], "dynamic":[]}
             self.success = self.time_init(standard_measures)
         except FileNotFoundError:
             self.success = "del"
@@ -281,26 +285,21 @@ class Stock:
         overlap = {}
         extreme_start = {}
         extreme_end = {}
-        date_range = {}
-        measure_paths = {"static":{}, "dynamic":{}}
         needed_measures = []
-        measures_and_intervals = {"static":{}, "dynamic":{}}
-        date_dict = {"static":[], "dynamic":[]}
         #Both static and dynamic time init
-        missing_measures = {"static":[], "dynamic":[]}
         irrelevant_measures = []
         success = {"static":0, "dynamic":0}
         flags = {"static":0, "dynamic":0}
         for motion in ["static", "dynamic"]:
-            for measure in standard_measures[motion]:
+            uninitialized_measures = []
+            for measure in standard_measures[motion]: # Detect the measures that have not been initialized yet 
                 if not measure in self.initialized_measures[motion]:
-                    missing = True
-                    break
-            if not missing:
+                    uninitialized_measures.append(measure)
+            if uninitialized_measures == []:
                 flags[motion] = 1
                 continue
             # Get all the constituent measures needed through recursivefact
-            for measure in standard_measures[motion]:
+            for measure in uninitialized_measures:
                 # print(f"Getting {measure}")
                 #Make a copy.deepcopy if not working 
                 if measure in deprecate_conversion:
@@ -311,20 +310,20 @@ class Stock:
                 # needed_measures += pathways["needed"]
                 del pathways["del"]
                 if pathways["paths"] != None:
-                    measure_paths[motion].update({measure: (pathways["paths"][0], pathways["paths"][1])})
+                    self.measure_paths[motion].update({measure: pathways["paths"][0]})
                     needed_measures += pathways["paths"][2]
-                    date_dict[motion].append(pathways["paths"][1])
-                    measures_and_intervals[motion][measure] = pathways["paths"][1]
+                    self.date_dict[motion].append(pathways["paths"][1])
+                    self.measures_and_intervals[motion][measure] = pathways["paths"][1]
                 else:
-                    missing_measures[motion].append(measure)
-            if measure_paths[motion] == {}:
+                    self.missing[motion].append(measure)
+            if self.measure_paths[motion] == {}:
                 return "del"  
-            overlap[motion] = calculate_overlap(date_dict[motion])   
+            overlap[motion] = calculate_overlap(self.date_dict[motion])   
             if overlap[motion] != []:
                 success[motion] = 1
             else:
                 success[motion] = 1
-            dates = [item for sublist in date_dict[motion] for item in sublist]
+            dates = [item for sublist in self.date_dict[motion] for item in sublist]
             if dates == []:
                 extreme_start[motion] = pd.Timestamp.now()
                 extreme_end[motion] = pd.Timestamp.now()
@@ -333,18 +332,13 @@ class Stock:
                 extreme_start[motion] = min(start_dates)
                 extreme_end[motion] = max(end_dates)
 
-        if flags["static"] and flags["dynamic"]: #If already initialized 
-            return (flags["static"], flags["dynamic"])
+        if flags["static"] and flags["dynamic"]: #If both static and dynamic don't have any new measures to init
+            return 1,1
         #We do it akward like this because we need the to stay when flags are triggered
-        self.measures_and_intervals = measures_and_intervals
-        self.paths = measure_paths
-        self.missing = missing_measures
         self.ignored = irrelevant_measures
-        self.date_dict = date_dict
         self.overlap = overlap
         self.extreme_start = extreme_start
         self.extreme_end = extreme_end
-        self.date_range = date_range
         #remove duplicates
         needed_measures = list(set(needed_measures))
         self.initialized_measures = standard_measures
@@ -387,7 +381,6 @@ class Stock:
         if type(self.fullprice) == int:
             return 0
         Price = self.fullprice[["close", "adjclose"]].copy()
-        # Price = Price.reindex(self.date_range)
         self.price = Price.ffill().bfill()
         return 1 
     
@@ -866,7 +859,7 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
         
     if measure in measure_conversion:
         if measure not in used["conversion"]:
-            used["conversion"] += measure
+            used["conversion"].append(measure)
             for replacement in measure_conversion[measure]:
                 path = recursive_date_gather(comp, replacement, depth+1, path_date, approx, used, printout)
                 # path = path_finder(path)
@@ -875,7 +868,7 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
 
     if measure in additive_conversion:
         if measure not in used["add"]:
-            used["add"] += measure
+            used["add"].append(measure)
             branches = []
             parts = []
             if additive_conversion[measure] != []:
@@ -901,7 +894,7 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
 
     if measure in subtract_conversion:
         if measure not in used["sub"]:
-            used["sub"] += measure
+            used["sub"].append(measure)
             path_add = recursive_date_gather(comp,subtract_conversion[measure][0],depth+1, path_date, approx, used, printout)
             path_sub = recursive_date_gather(comp,subtract_conversion[measure][1],depth+1, path_date, approx, used, printout)
             if path_add != None and path_sub != None:
@@ -912,20 +905,18 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
                         paths.append(({measure:{"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}}},interval, needed))
                     else:
                         paths.append(({"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}},interval, needed))
-
     if approx:
         if measure in approximate_measure_conversion:
             if measure not in used["approx_conversion"]:
-                used["approx_conversion"] += measure
+                used["approx_conversion"].append(measure)
                 for replacement in approximate_measure_conversion[measure]:
                     path = recursive_date_gather(comp, replacement, depth+1, path_date, approx, used, printout)
                     # path = path_finder(path)
                     if path != None:
-                        paths.append(({replacement:path[0]},path[1],path[2]))
-                    
+                        paths.append(({replacement:path[0]},path[1],path[2]))     
         if measure in approximate_additive_conversion:
             if measure not in used["approx_add"]:
-                used["approx_add"] += measure
+                used["approx_add"].append(measure)
                 branches = []
                 parts = []  #We need to record which parts we actuall used
                 optionals = 0 #To calc the percentage of optionals used
@@ -951,8 +942,7 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
                         if depth == 0:
                             paths.append(({measure:{"add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
                         else:
-                            paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))
-                        
+                            paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))            
     if depth ==0:
         if path_date["del"] == True:
             return path_date
@@ -987,9 +977,9 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
         for measure in measures[motion]:
             if measure not in comp.missing[motion]:
                 print(f"{comp.ticker} Getting {measure}")
-                print(comp.paths[motion][measure][0])
+                print(comp.measure_paths[motion][measure])
                 intervals = comp.measures_and_intervals[motion][measure]
-                data, unit = path_selector(comp, measure, comp.paths[motion][measure][0], intervals, row_delta , column_delta , static_tolerance, dynamic_row_delta,dynamic_tolerance, lookbehind, annual, reshape_approx)
+                data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], intervals, row_delta , column_delta , static_tolerance, dynamic_row_delta,dynamic_tolerance, lookbehind, annual, reshape_approx)
                 data.name = measure
                 frames_dict[motion].append(data)
                 unit_dict[motion].append(unit)
