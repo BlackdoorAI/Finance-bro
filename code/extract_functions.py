@@ -322,7 +322,7 @@ class Stock:
             if overlap[motion] != []:
                 success[motion] = 1
             else:
-                success[motion] = 1
+                success[motion] = 0
             dates = [item for sublist in self.date_dict[motion] for item in sublist]
             if dates == []:
                 extreme_start[motion] = pd.Timestamp.now()
@@ -439,6 +439,7 @@ class Stock:
                 row_delta = dynamic_row_delta
                 column_delta = pd.Timedelta(days=95)
             tolerance = dynamic_tolerance * int(dynamic) + static_tolerance * (int(not dynamic))
+            data_start = data_start - lookbehind * column_delta - pd.Timedelta(days=5) #To account for the lookbehind, it does not matter if it is way too much, it will just turn out blank and we can handle it later
             if not dynamic: #static 
                 dates = list(reshaped.keys())
                 base_dates = pd.date_range(start=data_end, end=data_start, freq=-row_delta) #Inverted start and end to keep the correct order
@@ -522,29 +523,88 @@ def data_concat(frames_intervals_list):
     for frame, interval in frames_intervals_list:
         pass
 
-def operate(frames, operation, approx):
+def operate(comp, frames, frame_names, operation, measure_name, approx, approx_needed = 0):
+    #Rename the frames so we can easily use them and check if they are empty to prevent errors
+    frames_and_names = [(frame_rename(frame, measure_name),frame_name) for frame, frame_name in zip(frames,frame_names) if frame.empty == False]
+    frames, frame_names = zip(*frames_and_names)
+    if operation == "sub" and len(frames) != 2:
+        print("Need two frames to sub, the empty check could have triggered")
+    static = comp.measures_and_intervals["static"].get(frame_names[0], False)
+    if static == False:
+        dynamic = comp.measures_and_intervals["dynamic"].get(frame_names[0], False)
+        if dynamic == False:
+            print("Operate: frame not in measures_and_intervals")
+        else:
+            motion = "dynamic"
+    else:
+        motion = "static"
+    #First we find the intervals for the data that we have 
+    intervals_list = []
+    for name in frame_names:
+        intervals = comp.measures_and_intervals[motion][name]
+        intervals_list.append(intervals)
+    frames_and_intervals = list(zip(frames,intervals_list))
     if not approx: 
-        overlap_start = max([frame.index.min() for frame in frames])
-        overlap_end = min([frame.index.max() for frame in frames])
-        # This makes sure that the real overlap is included
-        extended_start = overlap_start - pd.Timedelta(days=5)
-        extended_end = overlap_end + pd.Timedelta(days=5)
-
-        frames = [frame[extended_start:extended_end] for frame in frames]
-        reasign_index = frames[0].index 
-        frames = [frame.reset_index(drop=True) for frame in frames]
-        if operation == "sub":
-            resulting_frame = frames[0] - frames[1]
-
-        if operation == "add":
-            resulting_frame = frames[0]
-            for frame in frames[1:]:
-                resulting_frame += frame
-
-        resulting_frame.index = reasign_index
+        # calc the real overlap intervals then iterate through them and add the stuff back,
+        extended_intervals_list = []  #We extened the intervals since the start and end could be a few days apart
+        for intervals in intervals_list:
+            extended_intervals = []
+            for interval in intervals:
+                start, end = interval
+                extended_intervals.append((start - pd.Timedelta(days=5), end + pd.Timedelta(days=5)))
+            extended_intervals_list.append(extended_intervals)
+        overlap_intervals = calculate_overlap(intervals_list)
+        total_frame = pd.DataFrame()
+        for overlap in overlap_intervals:
+            overlap_start, overlap_end = overlap
+            # This makes sure that the real overlap is included
+            # extended_start = overlap_start - pd.Timedelta(days=5)
+            # extended_end = overlap_end + pd.Timedelta(days=5)
+            extended_start = overlap_start
+            extended_end = overlap_end
+            temp_frames = [frame[extended_end:extended_start] for frame in frames] #Start is switched with end because our frame are inverted
+            reasign_index = temp_frames[0].index 
+            temp_frames = [frame.reset_index(drop=True) for frame in temp_frames]
+            if operation == "sub":
+                resulting_frame = temp_frames[0] - temp_frames[1]
+            if operation == "add":
+                resulting_frame = temp_frames[0]
+                for frame in temp_frames[1:]:
+                    resulting_frame += frame
+            resulting_frame.index = reasign_index
+            total_frame = total_frame.combine_first(resulting_frame)
+        return total_frame[::-1]
+    
     else: #We keep residuals here 
+        #Make a total index that we will use as the canvas for all the operations
+        all_indices = pd.concat([pd.Series(frame.index) for frame in frames if not frame.index.empty])
+        index_combined = pd.Index(all_indices.dropna().unique())
+        total_index = index_combined.sort_values()
+        differences = total_index.to_series().diff()
+        differences.iloc[0] = pd.Timedelta(days=91) #To keep the first value 
+        filtered_index = total_index[differences > pd.Timedelta(days=5)] #We do this so we they are all spaced enough apart 
+        starting_frame = pd.DataFrame(0, index=filtered_index, columns =frames[0].columns) #Make it the same as previous frames
+        starting_frame = starting_frame[::-1]
+        starting_frame["checker"] = 0
+        for frame in frames:
+            frame["checker"] = 1
+            frame.apply(lambda row: 0 if row.isnull().any() else 1) #You can implement fractions
+            frame.fillna(0, inplace = True)
         if operation == "add":
-            pass 
+            for frame, intervals in frames_and_intervals:
+                for interval in intervals:
+                    start, end = interval
+                    extended_start = start - pd.Timedelta(days=5)
+                    extended_end = end + pd.Timedelta(days=5)
+                    reasign_index = starting_frame[extended_end:extended_start].index
+                    temp_frame = frame[extended_end:extended_start]
+                    temp_frame.index = reasign_index
+                    starting_frame = starting_frame.add(temp_frame, fill_value=0)[::-1]
+            final_frame = starting_frame[starting_frame["checker"] >= approx_needed] #Change this cause we want the nans and a continous interval
+            final_frame.drop(columns=["checker"])
+            return final_frame
+        else:
+            print("Only add is possible with approx")
 
 def path_selector(comp, measure, path, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, reshape_approx = False):
     """
