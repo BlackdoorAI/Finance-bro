@@ -304,7 +304,7 @@ class Stock:
                 #Make a copy.deepcopy if not working 
                 if measure in deprecate_conversion:
                     measure = deprecate_conversion[measure]
-                pathways = recursive_date_gather(self, measure)
+                pathways = recursive_date_gather(self, measure, motion)
                 if pathways["del"]:
                     return "del"
                 # needed_measures += pathways["needed"]
@@ -410,17 +410,21 @@ class Stock:
             point_list, unit = unitrun(data["units"], self.ticker)
             if point_list == False:
                 return "del"
-            reshaped, intervals, dynamic = reshape(measure, point_list, self.ticker, converted=False)
+            if measure in annual_measures:
+                approx = True
+            else:
+                approx = False
+            reshaped, intervals, dynamic = reshape(measure, point_list, self.ticker, converted=False, approx=approx)
             return intervals
         if measure in self.converted_data:
             data= self.converted_data[measure]
             converted= True
         elif measure in irrelevants[get_category(self.sic)]:
-            base_dates = pd.date_range(start=self.extreme_end["static"], end=self.extreme_start["static"], freq=-row_delta)
+            base_dates = pd.date_range(start=self.extreme_start["static"], end=self.extreme_end["static"], freq=row_delta)
             frame = pd.DataFrame(index =base_dates, columns = [f"{measure}-{i}" for i in range(0,lookbehind)])
             frame = frame.infer_objects()
             frame.fillna(0,inplace = True)
-            frame = frame.iloc[::-1]
+            frame = frame.iloc
             return frame, "ignored"
         elif measure in self.data:
             data = self.data[measure]
@@ -442,7 +446,7 @@ class Stock:
             data_start = data_start - lookbehind * column_delta - pd.Timedelta(days=5) #To account for the lookbehind, it does not matter if it is way too much, it will just turn out blank and we can handle it later
             if not dynamic: #static 
                 dates = list(reshaped.keys())
-                base_dates = pd.date_range(start=data_end, end=data_start, freq=-row_delta) #Inverted start and end to keep the correct order
+                base_dates = pd.date_range(start=data_start, end=data_end, freq=row_delta) #No longer Inverted start and end to keep the correct order
                 if base_dates.empty:
                     print("The interval doesn't fit with frequency")
                 i_values = np.arange(lookbehind)  # An array [0, 1, ..., lookbehind-1]
@@ -494,13 +498,11 @@ class Stock:
             frame = pd.DataFrame.from_dict(frame_dict, orient='index')
             if frame.empty:
                 print(f"{measure} inelligible for {self.ticker}")
-                total_frame = frame
-                total_frame = pd.DataFrame(columns=[f"{measure}-{i}" for i in range(lookbehind)])
+                total_frame = pd.DataFrame(columns=[i for i in range(lookbehind)])
             elif k == 0:
                 total_frame = frame
             elif k != 0:
                 total_frame = total_frame.combine_first(frame)
-        total_frame = total_frame.iloc[::-1]
         total_frame.columns = [f"{measure}-{i}" for i in range(0,lookbehind)]
         return total_frame, "Some_unit"   
         # except KeyError as e:
@@ -523,25 +525,65 @@ def data_concat(frames_intervals_list):
     for frame, interval in frames_intervals_list:
         pass
 
-def operate(comp, frames, frame_names, operation, measure_name, approx, approx_needed = 0):
+def operate(comp, frames, frame_names, operation, measure, dynamic, approx, approx_needed = 0):
     #Rename the frames so we can easily use them and check if they are empty to prevent errors
-    frames_and_names = [(frame_rename(frame, measure_name),frame_name) for frame, frame_name in zip(frames,frame_names) if frame.empty == False]
+    frames_and_names = [(frame_rename(frame, measure),frame_name) for frame, frame_name in zip(frames,frame_names) if frame.empty == False]
     frames, frame_names = zip(*frames_and_names)
     if operation == "sub" and len(frames) != 2:
         print("Need two frames to sub, the empty check could have triggered")
-    static = comp.measures_and_intervals["static"].get(frame_names[0], False)
-    if static == False:
-        dynamic = comp.measures_and_intervals["dynamic"].get(frame_names[0], False)
-        if dynamic == False:
-            print("Operate: frame not in measures_and_intervals")
+    if dynamic == False: #This alignment doesn't work with static data that is a few days apart because we filter the days that are close to each other
+        values = list(frames)
+        if not approx:
+            if operation == "add":
+                #Get all the possible indexes for the frame
+                frame1 = values[0]
+                for idx, value in enumerate(values[1:], start=1):
+                    frame1, value = frame1.align(value, join="outer", axis=0)
+                    values[idx] = value
+                result_frame = pd.DataFrame(index=frame1.index)
+                for i, col in enumerate(frame1.columns):
+                    result_frame[f'{measure}-{i}'] = frame1[col]  # Initialize with frame1's columns {i - lookbehind +1}
+                for value in values[1:]:
+                    for i, col in enumerate(value.columns):
+                        result_frame[f'{measure}-{i}'] = result_frame[f'{measure}-{i}'].add(value[col])
+                return result_frame
+            
+            if operation == "sub":
+                add, sub = values[0], values[1]
+                add, sub = add.align(sub, join="outer", axis=0)
+                result_frame = pd.DataFrame(index=add.index)
+                for i, col in enumerate(add.columns):
+                    result_frame[f'{measure}-{i}'] = add[col]  # Initialize with add's columns
+                for i, col in enumerate(sub.columns):
+                    result_frame[f'{measure}-{i}'] = result_frame[f'{measure}-{i}'].sub(sub[col])
+                return result_frame
         else:
-            motion = "dynamic"
-    else:
-        motion = "static"
+            if operation == "add":
+                #Get all the possible indexes for the frame
+                frame1 = values[0]
+                for idx, value in enumerate(values[1:], start=1):
+                    frame1, value = frame1.align(value, join="outer", axis=0)
+                    values[idx] = value
+                for i, col in enumerate(frame1.columns):
+                    result_frame[f'{measure}-{i}'] = frame1[col]  # Initialize with frame1's columns {i - lookbehind +1}
+                result_frame["checker"] = 0
+                for frame in values:
+                    frame["checker"] = 1
+                    frame.apply(lambda row: 0 if row.isnull().any() else 1) #You can implement fractions
+                    frame.fillna(0, inplace = True)
+                result_frame = pd.DataFrame(index=frame1.index)
+                for value in values[1:]:
+                    for i, col in enumerate(value.columns):
+                        result_frame[f'{measure}-{i}'] = result_frame[f'{measure}-{i}'].add(value[col], fill_value = 0) #fill_value Specific for approx 
+                columns_to_replace = result_frame.columns  
+                final_frame = pd.DataFrame()
+                for col in columns_to_replace:
+                    final_frame[col] = np.where(starting_frame["checker"] >= approx_needed, starting_frame[col], np.nan) #We want to keep the gaps in the frame for addition and stuff
+                return final_frame
     #First we find the intervals for the data that we have 
     intervals_list = []
     for name in frame_names:
-        intervals = comp.measures_and_intervals[motion][name]
+        intervals = comp.measures_and_intervals["dynamic"][name] #We are in dynamic anyway
         intervals_list.append(intervals)
     frames_and_intervals = list(zip(frames,intervals_list))
     if not approx: 
@@ -553,7 +595,7 @@ def operate(comp, frames, frame_names, operation, measure_name, approx, approx_n
                 start, end = interval
                 extended_intervals.append((start - pd.Timedelta(days=5), end + pd.Timedelta(days=5)))
             extended_intervals_list.append(extended_intervals)
-        overlap_intervals = calculate_overlap(intervals_list)
+        overlap_intervals = calculate_overlap(extended_intervals_list)
         total_frame = pd.DataFrame()
         for overlap in overlap_intervals:
             overlap_start, overlap_end = overlap
@@ -562,7 +604,7 @@ def operate(comp, frames, frame_names, operation, measure_name, approx, approx_n
             # extended_end = overlap_end + pd.Timedelta(days=5)
             extended_start = overlap_start
             extended_end = overlap_end
-            temp_frames = [frame[extended_end:extended_start] for frame in frames] #Start is switched with end because our frame are inverted
+            temp_frames = [frame[extended_start:extended_end] for frame in frames]
             reasign_index = temp_frames[0].index 
             temp_frames = [frame.reset_index(drop=True) for frame in temp_frames]
             if operation == "sub":
@@ -573,7 +615,7 @@ def operate(comp, frames, frame_names, operation, measure_name, approx, approx_n
                     resulting_frame += frame
             resulting_frame.index = reasign_index
             total_frame = total_frame.combine_first(resulting_frame)
-        return total_frame[::-1]
+        return total_frame
     
     else: #We keep residuals here 
         #Make a total index that we will use as the canvas for all the operations
@@ -584,7 +626,7 @@ def operate(comp, frames, frame_names, operation, measure_name, approx, approx_n
         differences.iloc[0] = pd.Timedelta(days=91) #To keep the first value 
         filtered_index = total_index[differences > pd.Timedelta(days=5)] #We do this so we they are all spaced enough apart 
         starting_frame = pd.DataFrame(0, index=filtered_index, columns =frames[0].columns) #Make it the same as previous frames
-        starting_frame = starting_frame[::-1]
+        starting_frame = starting_frame
         starting_frame["checker"] = 0
         for frame in frames:
             frame["checker"] = 1
@@ -596,17 +638,21 @@ def operate(comp, frames, frame_names, operation, measure_name, approx, approx_n
                     start, end = interval
                     extended_start = start - pd.Timedelta(days=5)
                     extended_end = end + pd.Timedelta(days=5)
-                    reasign_index = starting_frame[extended_end:extended_start].index
-                    temp_frame = frame[extended_end:extended_start]
+                    reasign_index = starting_frame[extended_start:extended_end].index
+                    temp_frame = frame[extended_start:extended_end]
                     temp_frame.index = reasign_index
-                    starting_frame = starting_frame.add(temp_frame, fill_value=0)[::-1]
-            final_frame = starting_frame[starting_frame["checker"] >= approx_needed] #Change this cause we want the nans and a continous interval
+                    starting_frame = starting_frame.add(temp_frame, fill_value=0)
+            columns_to_replace = starting_frame.columns  
+            final_frame = pd.DataFrame()
+            for col in columns_to_replace:
+                final_frame[col] = np.where(starting_frame["checker"] >= approx_needed, starting_frame[col], np.nan) #We want to keep the gaps in the frame for addition and stuff
+            # final_frame = starting_frame[starting_frame["checker"] >= approx_needed] 
             final_frame.drop(columns=["checker"])
             return final_frame
         else:
             print("Only add is possible with approx")
 
-def path_selector(comp, measure, path, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, reshape_approx = False):
+def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, reshape_approx = False):
     """
     Takes in the desired path to the data and outputs the data
     New recursive_fact
@@ -628,14 +674,14 @@ def path_selector(comp, measure, path, intervals = None, row_delta = pd.Timedelt
                 new_intervals = calculate_overlap([intervals, [get_interval]])
             else:
                 new_intervals = [get_interval]
-            concat_frame, unit = path_selector(comp, measure, {measure:fledgling}, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            concat_frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
             for sapling in tree[1:]:
                 fledgling, get_interval = sapling
                 if intervals != None:
                     new_intervals = calculate_overlap([intervals, [get_interval]])
                 else:
                     new_intervals = [get_interval]
-                frame, unit = path_selector(comp, measure, {measure:fledgling}, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
                 if frame.empty:
                     continue
                 frame.columns = concat_frame.columns
@@ -645,56 +691,37 @@ def path_selector(comp, measure, path, intervals = None, row_delta = pd.Timedelt
         #Add path
         elif root == "add":
             values = []
+            frame_names = []
             for sprout, tree_part in tree.items():
-                add_value, unit = path_selector(comp, sprout ,{sprout:tree_part}, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                add_value, unit = path_selector(comp, sprout, {sprout:tree_part}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
                 values.append(add_value)
-            #Get all the possible indexes for the frame
-            frame1 = values[0]
-            for idx, value in enumerate(values[1:], start=1):
-                frame1, value = frame1.align(value, join="outer", axis=0)
-                values[idx] = value
-            result_frame = pd.DataFrame(index=frame1.index)
-            for i, col in enumerate(frame1.columns):
-                result_frame[f'{measure}-{i}'] = frame1[col]  # Initialize with frame1's columns {i - lookbehind +1}
-            for value in values[1:]:
-                for i, col in enumerate(value.columns):
-                    result_frame[f'{measure}-{i}'] = result_frame[f'{measure}-{i}'].add(value[col])
+                frame_names.append(sprout)
+            result_frame = operate(comp, values, frame_names, "add", measure, dynamic, False)
             result_frame = frame_rename(result_frame,measure)
             return result_frame, unit
             
         elif root == "sub":
             larch = list(tree.items())
-            add, unit = path_selector(comp, larch[0][0], {larch[0][0]:larch[0][1]}, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
-            sub, unit = path_selector(comp, larch[1][0], {larch[1][0]:larch[1][1]}, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            add, unit = path_selector(comp, larch[0][0], {larch[0][0]:larch[0][1]}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            sub, unit = path_selector(comp, larch[1][0], {larch[1][0]:larch[1][1]}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
             #Get all the possible indexes for the frame
             values = [add, sub]
-            add, sub = add.align(sub, join="outer", axis=0)
-            result_frame = pd.DataFrame(index=add.index)
-            for i, col in enumerate(add.columns):
-                result_frame[f'{measure}-{i}'] = add[col]  # Initialize with add's columns
-            for i, col in enumerate(sub.columns):
-                result_frame[f'{measure}-{i}'] = result_frame[f'{measure}-{i}'].sub(sub[col])
+            frame_names = [larch[0][0], larch[1][0]]
+            result_frame = operate(comp, values, frame_names, "sub", measure, dynamic, False)
             result_frame = frame_rename(result_frame,measure)
             return result_frame,unit
         
         elif root == "approx_add":
             values = []
+            frame_names = []
             for sprout, tree_part in tree.items():
-                add_value, unit = path_selector(comp, sprout ,{sprout:tree_part}, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                add_value, unit = path_selector(comp, sprout ,{sprout:tree_part}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
                 #Specifically for approx
                 add_value.fillna(0, inplace =True)
                 values.append(add_value)
-            #Get all the possible indexes for the frame
-            frame1 = values[0]
-            for idx, value in enumerate(values[1:], start=1):
-                frame1, value = frame1.align(value, join="outer", axis=0)
-                values[idx] = value
-            result_frame = pd.DataFrame(index=frame1.index)
-            for i, col in enumerate(frame1.columns):
-                result_frame[f'{measure}-{i}'] = frame1[col]  # Initialize with frame1's columns {i - lookbehind +1}
-            for value in values[1:]:
-                for i, col in enumerate(value.columns):
-                    result_frame[f'{measure}-{i}'] = result_frame[f'{measure}-{i}'].add(value[col])
+                frame_names.append(sprout)
+            threshold = approximate_additive_conversion[measure][1] #Get the wanted threshold for the frames and shit
+            result_frame = operate(comp, values, frame_names, "add", measure, dynamic, True, threshold)
             result_frame = frame_rename(result_frame,measure)
             #Specifically for approx
             result_frame.replace(0,np.nan, inplace=True)
@@ -702,7 +729,7 @@ def path_selector(comp, measure, path, intervals = None, row_delta = pd.Timedelt
 
         #serves as the measure conversion part
         else:
-            return path_selector(comp, root, tree, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            return path_selector(comp, root, tree, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
 
 # Function to find overlap between two intervals
 def find_overlap(interval1, interval2):
@@ -879,7 +906,7 @@ def analyze_structure(structure, depth=1):
     return max_depth, total_elements
 
 #Used: {"conversion":["bla", "blabla"], "addition":[blabla]}
-def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True, used=None, printout =False):
+def recursive_date_gather(comp, measure, motion, depth=0, path_date=None, approx = True, used=None, printout =False):
     #path = ("first_step", "second_step"...)
     #The whole thing returns the best path with the date that you get
     #Individual calls return the best dates and the measures needed to get it as a tuple
@@ -921,7 +948,7 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
         if measure not in used["conversion"]:
             used["conversion"].append(measure)
             for replacement in measure_conversion[measure]:
-                path = recursive_date_gather(comp, replacement, depth+1, path_date, approx, used, printout)
+                path = recursive_date_gather(comp, replacement, motion, depth+1, path_date, approx, used, printout)
                 # path = path_finder(path)
                 if path != None:
                     paths.append(({replacement:path[0]},path[1],path[2]))
@@ -935,7 +962,7 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
                 abort = False
                 for part in additive_conversion[measure]:
                     if abort == False:
-                        path = recursive_date_gather(comp, part,depth+1,path_date, approx, used, printout) 
+                        path = recursive_date_gather(comp, part, motion, depth+1,path_date, approx, used, printout) 
                         if path == None:
                             if part not in optional:
                                 abort = True
@@ -955,8 +982,8 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
     if measure in subtract_conversion:
         if measure not in used["sub"]:
             used["sub"].append(measure)
-            path_add = recursive_date_gather(comp,subtract_conversion[measure][0],depth+1, path_date, approx, used, printout)
-            path_sub = recursive_date_gather(comp,subtract_conversion[measure][1],depth+1, path_date, approx, used, printout)
+            path_add = recursive_date_gather(comp,subtract_conversion[measure][0], motion, depth+1, path_date, approx, used, printout)
+            path_sub = recursive_date_gather(comp,subtract_conversion[measure][1], motion, depth+1, path_date, approx, used, printout)
             if path_add != None and path_sub != None:
                 stuff = path_finder([path_add, path_sub], True)
                 if stuff:
@@ -970,7 +997,7 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
             if measure not in used["approx_conversion"]:
                 used["approx_conversion"].append(measure)
                 for replacement in approximate_measure_conversion[measure]:
-                    path = recursive_date_gather(comp, replacement, depth+1, path_date, approx, used, printout)
+                    path = recursive_date_gather(comp, replacement, motion, depth+1, path_date, approx, used, printout)
                     # path = path_finder(path)
                     if path != None:
                         paths.append(({replacement:path[0]},path[1],path[2]))     
@@ -985,7 +1012,7 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
                     abort = False
                     for part in approxes:
                         if abort == False:
-                            path = recursive_date_gather(comp, part,depth+1,path_date, approx, used, printout) 
+                            path = recursive_date_gather(comp, part, motion, depth+1,path_date, approx, used, printout) 
                             if path == None: #Check if start is before end path[1][0] > path[1][1]
                                 if part not in optional:
                                     abort = True
@@ -1000,9 +1027,9 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
                     if stuff:
                         path, interval, needed = stuff
                         if depth == 0:
-                            paths.append(({measure:{"add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
+                            paths.append(({measure:{"approx_add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
                         else:
-                            paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))            
+                            paths.append(({"approx_add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))            
     if depth ==0:
         if path_date["del"] == True:
             return path_date
@@ -1013,6 +1040,8 @@ def recursive_date_gather(comp, measure, depth=0, path_date=None, approx = True,
     if paths == []:
         return None
     paths = path_finder(paths)
+    if paths != None:
+        comp.measures_and_intervals[motion][measure] = paths[1]
     return paths
 
 def get_category(sic):
@@ -1034,18 +1063,23 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
     motions = ["static", "dynamic"]
     motions = [motions[i] for i, condition in enumerate(available) if condition != 0]
     for motion in motions:
+        if motion == "dynamic":
+            dynamic = True
+        else:
+            dynamic = False
         for measure in measures[motion]:
             if measure not in comp.missing[motion]:
                 print(f"{comp.ticker} Getting {measure}")
                 print(comp.measure_paths[motion][measure])
                 intervals = comp.measures_and_intervals[motion][measure]
-                data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], intervals, row_delta , column_delta , static_tolerance, dynamic_row_delta,dynamic_tolerance, lookbehind, annual, reshape_approx)
+                data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], dynamic, intervals, row_delta , column_delta , static_tolerance, dynamic_row_delta,dynamic_tolerance, lookbehind, annual, reshape_approx)
                 data.name = measure
                 frames_dict[motion].append(data)
                 unit_dict[motion].append(unit)
         if frames_dict[motion] == []:
             break
         df[motion] = pd.concat(frames_dict[motion], axis =1, join="outer")
+        df[motion] = df[motion][comp.extreme_end[motion]:comp.extreme_start[motion]]
     #If units are necessary
     # columns_multiindex = pd.MultiIndex.from_tuples([(col, unit) for col, unit in zip(df.columns, unit_list)],names=['Variable', 'Unit'])
     # df.columns = columns_multiindex

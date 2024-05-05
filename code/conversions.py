@@ -132,9 +132,11 @@ optional = ["DividendsPayableCurrent",
             "UnrecognizedTaxBenefitsIncomeTaxPenaltiesAccrued"
             ]
 
-shit_approximates = ["ApproxFreeCashFlow", "LongTermDebt","AssetsNoncurrent", "Depreciation"]
+shit_approximates = ["ApproxFreeCashFlow", "LongTermDebt", "AssetsNoncurrent", "Depreciation"]
 
 dynamic_fuckers = ["ShortTermDebtWeightedAverageInterestRate"]
+
+annual_measures = ["IncomeTaxesPaidNet", "DepreciationAndAmortization", "Depreciation", "AmortizationOfIntangibleAssets", "DepreciationDepletionAndAmortization"]
 
 #used in unitrun
 valid_units = ['USD','shares','USD/shares', 'Year', 'Entity', 'Segment', 'USD/Contract', 'Job',  'pure', 'USD/Investment', 'Position']
