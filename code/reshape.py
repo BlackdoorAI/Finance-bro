@@ -12,10 +12,10 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
     #Reshapes the datapoint list so that its indexed by end and each item retains its attrs
     #Designed to be used after data is converted to datetime
     #If we have it precomputed we just use it
-    if os.path.exists(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl"):
-        with open(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl", "rb") as file:
-            trinity = pickle.load(file)
-            return trinity
+    # if os.path.exists(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl"):
+    #     with open(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl", "rb") as file:
+    #         trinity = pickle.load(file)
+    #         return trinity
     dynamic = True
     if "start" not in datapoint_list[0]: 
         if measure not in dynamic_fuckers:
@@ -57,8 +57,9 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
             #This should create data that is connected, whenever there is a link missing, we construct it
             #The data is sorted by the end date 
             #When two points are used to infer data the later filing date is asigned to the new point 
-            for datapoint in datapoint_list:
-                datapoint["dur"] = timediff(datapoint["end"],datapoint["start"])
+            df = pd.DataFrame(datapoint_list)
+            df["dur"] = (df["end"] - df["start"]).apply(lambda x:  x.days)
+            datapoint_list = df.to_dict(orient= 'records')
             connected = []
             gaps = []
             wanted_end = datapoint_list[0]["end"]
@@ -72,43 +73,79 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
                         wanted_end = datapoint["end"] + pd.Timedelta(days=91)
                         missing = False
                 #missing 
-                #Find the interval of possible points to use to infer
-                useful_ends = (wanted_end -pd.Timedelta(days=100),wanted_end + pd.Timedelta(days=370))
-                pieces =[]
-                for datapoint in datapoint_list:
-                    if useful_ends[0]<datapoint["end"] <useful_ends[1]:
-                        pieces.append(datapoint)
                 synthesised = False
+                useful_ends = [wanted_end -pd.Timedelta(days=100),wanted_end + pd.Timedelta(days=370)]
+                df = pd.DataFrame(datapoint_list)
+                #Find the candidates
+                df = df[(df['end'] > useful_ends[0]) & (df['end'] < useful_ends[1])].reset_index()
+                #OPTIONAL
+                pieces = df.to_dict(orient = "records")
+                #Calculate the boolean matrices of all the combinations and check them
+                dur_diff = np.abs(df['dur'].values[:, None] - df['dur'].values) < 100 #The duration of the resulting
+                end_diff = (np.abs((df['end'].values[:, None] - df['end'].values).astype('timedelta64[D]').astype(int)) < 6)
+                start_diff = (np.abs((df['start'].values[:, None] - df['start'].values).astype('timedelta64[D]').astype(int)) < 6)
+
+                # Filter combinations based on your complex conditional logic
+                # This is a simplified example, you would add more conditions based on your logic above
+                mask = dur_diff & (end_diff | start_diff)
+                np.fill_diagonal(mask, False)
+                # Create a DataFrame from the filtered pairs
+                i, j = np.where(mask)
+                result = pd.DataFrame({
+                    'end': np.where(df.loc[i, 'dur'].values > df.loc[j, 'dur'].values, df.loc[j, 'start'], df.loc[i, 'start']),
+                    'start': np.where(df.loc[i, 'dur'].values > df.loc[j, 'dur'].values, df.loc[i, 'start'], df.loc[j, 'end']),
+                    'val': np.where(df.loc[i, 'dur'].values > df.loc[j, 'dur'].values, df.loc[i, 'val'].values - df.loc[j, 'val'].values, df.loc[j, 'val'].values - df.loc[i, 'val'].values),
+                    'filed': np.maximum(df.loc[i, 'filed'].values, df.loc[j, 'filed'].values),
+                })
+                # Add additional processing based on your logic
+                # print("before:",len(result.index))
+                result_wanted = result[np.abs((result['end'] - wanted_end).dt.days) < 6]
+                # print("after:", len(result_wanted.index))
+                # Optional: sort and select based on 'filed' or any other criteria
                 candidates = []
-                for i,piece1 in enumerate(pieces,start=1):
-                    for piece2 in pieces[i:]:
-                        if abs(piece1["dur"] - piece2["dur"]) <100: #If the periods have a difference representing a quarter
-                            if piece1["dur"] > piece2["dur"]: #Piece one is the longer duration 
-                                if timediff(piece1["end"],piece2["end"]) <6: #If they match by their ends 
-                                    candidates.append({"end": piece2["start"], "start":piece1["start"], "val": piece1["val"]-piece2["val"], "filed": max([piece1["filed"], piece2["filed"]])})
+                if result_wanted.empty:
+                    pass
+                else:
+                    result_sorted = result_wanted.sort_values(by='filed', ascending=True)
+                    selected = result_sorted.iloc[0].to_dict()
+                    selected['special'] = 'synth_combo'
+                    # Append to a list if needed
+                    candidates.append(selected)
+                # Find the interval of possible points to use to infer
+                # synthesised = False
+                # candidates = [] #We will get all the ways to get the thing here and pick the one with the best filed date
+                # for i,piece1 in enumerate(pieces,start=1):
+                #     for piece2 in pieces[i:]:
+                #         if abs(piece1["dur"] - piece2["dur"]) <100: #If the periods have a difference representing a quarter
+                #             if piece1["dur"] > piece2["dur"]: #Piece one is the longer duration 
+                #                 if timediff(piece1["end"],piece2["end"]) <6: #If they match by their ends 
+                #                     if timediff(piece2["start"], wanted_end) <10: #Check if we are actually getting what we want
+                #                         candidates.append({"end": piece2["start"], "start":piece1["start"], "val": piece1["val"]-piece2["val"], "filed": max([piece1["filed"], piece2["filed"]])})
 
-                                elif (timediff(piece1["start"], piece2["start"])) < 6: #If they match by their starts
-                                    candidates.append({"end": piece1["end"], "start": piece2["end"], "val": piece1["val"]-piece2["val"], "filed": max([piece1["filed"], piece2["filed"]])})
+                #                 elif (timediff(piece1["start"], piece2["start"])) < 6: #If they match by their starts
+                #                     if timediff(piece1["end"], wanted_end):
+                #                         candidates.append({"end": piece1["end"], "start": piece2["end"], "val": piece1["val"]-piece2["val"], "filed": max([piece1["filed"], piece2["filed"]])})
 
-                            elif piece1["dur"] <piece2["dur"]:
-                                if timediff(piece1["end"],piece2["end"]) <6: #If they match by their ends 
-                                    candidates.append({"end": piece1["start"], "start":piece2["start"], "val": piece2["val"]-piece1["val"], "filed": max([piece1["filed"], piece2["filed"]])})
+                #             elif piece1["dur"] <piece2["dur"]:
+                #                 if timediff(piece1["end"],piece2["end"]) <6: #If they match by their ends 
+                #                     if timediff(piece1["start"], wanted_end):
+                #                         candidates.append({"end": piece1["start"], "start":piece2["start"], "val": piece2["val"]-piece1["val"], "filed": max([piece1["filed"], piece2["filed"]])})
 
-                                elif (timediff(piece1["start"], piece2["start"])) < 6: #If they match by their starts
-                                    candidates.append({"end": piece2["end"], "start": piece1["end"], "val": piece2["val"]-piece1["val"], "filed": max([piece1["filed"], piece2["filed"]])})
-                            if candidates != []:
-                                filed = candidates[0]["filed"]
-                                index=0
-                                for i, candidate in enumerate(candidates[1:],start=1):
-                                    if candidate["filed"] < filed:
-                                        filed = candidate["filed"]
-                                        index = i
-                                diff = candidates[index]
-                                if timediff(diff["end"], wanted_end) <10: #If the ends match we have the point
-                                    diff["special"] = "synth_combo"
-                                    connected.append(diff)
-                                    synthesised = True
-                                    wanted_end = diff["end"] + pd.Timedelta(days=91)
+                #                 elif (timediff(piece1["start"], piece2["start"])) < 6: #If they match by their starts
+                #                     if timediff(piece2["end"], wanted_end):
+                #                         candidates.append({"end": piece2["end"], "start": piece1["end"], "val": piece2["val"]-piece1["val"], "filed": max([piece1["filed"], piece2["filed"]])})
+                if candidates != []:
+                    filed = candidates[0]["filed"]
+                    index=0
+                    for i, candidate in enumerate(candidates[1:],start=1):
+                        if candidate["filed"] < filed:
+                            filed = candidate["filed"]
+                            index = i
+                    diff = candidates[index]
+                    diff["special"] = "synth_combo"
+                    connected.append(diff)
+                    synthesised = True
+                    wanted_end = diff["end"] + pd.Timedelta(days=91)
                 #This method introduces data that just is not true, thats why approx is important
                 if not synthesised and approx:
                     shortest_duration = 1000
