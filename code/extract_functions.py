@@ -466,11 +466,10 @@ class Stock:
                 timestamps = list(reshaped.keys()) 
                 timestamps = [timestamp for timestamp in timestamps if (data_start <= timestamp <=data_end)] #filter for the interval
                 index_length = len(timestamps) 
-                rows = [zip(timestamps[0:lookbehind], [None] + timestamps[0:lookbehind-1])]
+                rows = [zip(timestamps[0:lookbehind], [None]*lookbehind)] #The first few rows
                 for i in range(lookbehind+1, index_length):
                     # Extract the window of n elements
-                    window = zip(timestamps[i-lookbehind:i], timestamps[i-1-lookbehind:i-1])
-                    # Append the window to the rows list
+                    window = zip(timestamps[i-lookbehind:i], [None]*lookbehind)
                     rows.append(window)
 
                 # Convert the list of rows into a DataFrame
@@ -1072,14 +1071,14 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
                 print(f"{comp.ticker} Getting {measure}")
                 print(comp.measure_paths[motion][measure])
                 intervals = comp.measures_and_intervals[motion][measure]
-                data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], dynamic, intervals, row_delta , column_delta , static_tolerance, dynamic_row_delta,dynamic_tolerance, lookbehind, annual, reshape_approx)
+                data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], dynamic, intervals, row_delta , column_delta , static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
                 data.name = measure
                 frames_dict[motion].append(data)
                 unit_dict[motion].append(unit)
         if frames_dict[motion] == []:
             break
         df[motion] = pd.concat(frames_dict[motion], axis =1, join="outer")
-        df[motion] = df[motion][comp.extreme_end[motion]:comp.extreme_start[motion]]
+        df[motion] = df[motion][comp.extreme_start[motion]:comp.extreme_end[motion]]
     #If units are necessary
     # columns_multiindex = pd.MultiIndex.from_tuples([(col, unit) for col, unit in zip(df.columns, unit_list)],names=['Variable', 'Unit'])
     # df.columns = columns_multiindex
