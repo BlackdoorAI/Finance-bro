@@ -424,7 +424,6 @@ class Stock:
             frame = pd.DataFrame(index =base_dates, columns = [f"{measure}-{i}" for i in range(0,lookbehind)])
             frame = frame.infer_objects()
             frame.fillna(0,inplace = True)
-            frame = frame.iloc
             return frame, "ignored"
         elif measure in self.data:
             data = self.data[measure]
@@ -437,6 +436,8 @@ class Stock:
         reshaped, all_intervals, dynamic = reshape(measure, data, self.ticker, annual, reshape_approx, converted=converted) # _ is intervals, if the data has not been converted in the init, it will be here
         if intervals == None:
             intervals = all_intervals 
+        if intervals == []:
+            print(f"intervals empty for {measure}")
         for k ,interval in enumerate(intervals): #To save compute we only get the data that we really need, could be intervals with gaps
             data_start, data_end = interval
             if dynamic:
@@ -466,15 +467,18 @@ class Stock:
                 timestamps = list(reshaped.keys()) 
                 timestamps = [timestamp for timestamp in timestamps if (data_start <= timestamp <=data_end)] #filter for the interval
                 index_length = len(timestamps) 
-                rows = [zip(timestamps[0:lookbehind], [None]*lookbehind)] #The first few rows
-                for i in range(lookbehind+1, index_length):
-                    # Extract the window of n elements
-                    window = zip(timestamps[i-lookbehind:i], [None]*lookbehind)
+                unpadded_timestamps = timestamps
+                timestamps = [None] * lookbehind + timestamps #Padding
+                rows = [zip(timestamps[lookbehind:0:-1], [None]*lookbehind)] #The first few rows
+                # for i in range(lookbehind+1, index_length):
+                #     # Extract the window of n elements
+                #     window = zip(timestamps[i-lookbehind:i], [None]*lookbehind)
+                #     rows.append(window)
+                for i in range(1, index_length):
+                    window = zip(timestamps[i+lookbehind:i:-1], [None]*lookbehind)
                     rows.append(window)
-
-                # Convert the list of rows into a DataFrame
-                row_indexes = pd.DataFrame(rows, index = timestamps[lookbehind:])
-                frame_dict = {row_index:[] for row_index in timestamps[lookbehind:]}
+                row_indexes = pd.DataFrame(rows, index = unpadded_timestamps)
+                frame_dict = {row_index:[] for row_index in unpadded_timestamps}
                 
             for row_index, row in row_indexes.iterrows():
                 barrier = row_index + tolerance
@@ -673,18 +677,40 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
                 new_intervals = calculate_overlap([intervals, [get_interval]])
             else:
                 new_intervals = [get_interval]
-            concat_frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            if new_intervals != []:
+                concat_frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            else:
+                concat_frame = pd.DataFrame() #We need something to add so we have a placeholder
             for sapling in tree[1:]:
                 fledgling, get_interval = sapling
                 if intervals != None:
                     new_intervals = calculate_overlap([intervals, [get_interval]])
+                    if new_intervals == []:
+                        continue
                 else:
                     new_intervals = [get_interval]
                 frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
                 if frame.empty:
                     continue
-                frame.columns = concat_frame.columns
-                concat_frame = concat_frame.combine_first(frame)
+                if not concat_frame.empty:
+                    frame.columns = concat_frame.columns
+                    concat_frame = concat_frame.combine_first(frame)
+                else:
+                    concat_frame = frame
+            if dynamic:
+                filtered_dates = []
+                last_date = None
+                for index, row in concat_frame.iterrows():
+                    if last_date is None or (index - last_date).days >= 85:
+                        filtered_dates.append(row)
+                        last_date = index
+                        last_score = row.notna().sum()
+                    else:
+                        score = row.notna().sum()
+                        if score > last_score:
+                            filtered_dates.pop()
+                            filtered_dates.append(row)
+                concat_frame = pd.DataFrame(filtered_dates)
             concat_frame = frame_rename(concat_frame, measure)
             return concat_frame, unit  #The units are the same...
         #Add path
@@ -848,7 +874,8 @@ def path_finder(paths, constituent=False):
             if best == None: #since that means there are no other eligible intervals to add 
                 if appended_flag == False:
                     intervals.append((total_start, current_end)) #Add the closed interval we got 
-                first_path, (first_start, first_end), first_needed = sorted_paths[idx+1] ###
+                first_path, (first_start, first_end), first_needed = sorted_paths[idx+1]
+                first_index = idx+1 
                 for i, route in enumerate(sorted_paths[idx+2:], start=idx+2):
                     path, (start, end), needed = route
                     if start == first_start:    
@@ -863,7 +890,11 @@ def path_finder(paths, constituent=False):
                     needed_measures += first_needed
                     total_start = first_start
                     current_end = first_end
-                    appended_flag = False
+                    if first_index == len(sorted_paths) -1:
+                        intervals.append((total_start, current_end))
+                        break
+                    else:
+                        appended_flag = False
                 else:
                     idx += 1 #Go to the next iteration
                     appended_flag = True
@@ -1148,7 +1179,10 @@ def success_rate(availability_list):
 def ticker_fill(company_frames_availability):
     ticker_list = []
     for ticker, available in company_frames_availability.items():
-        (static, dynamic), price = available
+        success, price = available
+        if success == "del":
+            continue
+        (static, dynamic) = success
         if static and dynamic and price:
             continue
         else:
