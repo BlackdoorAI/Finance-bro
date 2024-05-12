@@ -8,7 +8,7 @@ from conversions import *
 def timediff(a,b):
     return abs((a-b).days)
 
-def reshape(measure, datapoint_list, ticker, annual = False, approx = False, converted = False, use_precompute = True):
+def reshape(measure, datapoint_list, ticker, annual = False, approx = False, converted = False, use_precompute = True, forced_static = 0):
     #Reshapes the datapoint list so that its indexed by end and each item retains its attrs
     #Designed to be used after data is converted to datetime
     #If we have it precomputed we just use it
@@ -30,7 +30,18 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
         if dynamic:
             df['start'] = pd.to_datetime(df['start'], format='%Y-%m-%d', errors='coerce')
         datapoint_list = df.to_dict("records")
-    if dynamic ==False:
+    if forced_static:
+        reshaped_data = {}
+        for item in datapoint_list:
+            date = item["end"]
+            if date not in reshaped_data:
+                reshaped_data[date] = []
+            reshaped_data[date].append({
+                "val": item["val"],
+                "start": item.get("start"),
+                "filed": item["filed"],
+            })
+    elif dynamic ==False:
         reshaped_data = {}
         for item in datapoint_list:
             date = item["end"]

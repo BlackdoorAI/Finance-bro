@@ -280,8 +280,6 @@ class Stock:
     def time_init(self, standard_measures):
         #Also serves as a filter for the companies with wrong currencies
         #Check to see if already initialized with the measures
-        missing = False
-        category = get_category(self.sic)
         overlap = {}
         extreme_start = {}
         extreme_end = {}
@@ -341,6 +339,11 @@ class Stock:
         self.extreme_end = extreme_end
         #remove duplicates
         needed_measures = list(set(needed_measures))
+        #Initialize the share value as well
+        for share_method in ["EntityCommonStockSharesOutstanding", "WeightedAverageNumberOfSharesOutstandingBasic"]:
+            share_have = self.data.get(share_method, False)
+            if share_have:
+                needed_measures.append(share_method)
         self.initialized_measures = standard_measures
         #Change the strings to datetime for the initialized measures
         #Flatten batches into a single DataFrame with an identifier
@@ -384,7 +387,7 @@ class Stock:
         self.price = Price.ffill().bfill()
         return 1 
     
-    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False):
+    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False, forced_static=0):
         """  
         If date_gather, then it returns a dataframe to allow recursive_fact to get the date.
         Returns a dataframe that has rows indexed row_delta away, with lookbehind columns that are column_delta away.
@@ -433,11 +436,15 @@ class Stock:
             return pd.DataFrame(), None
         #Get the index dates for the datpoints for measure
         #If the measure doesn't make sense for the company's category, replace all of the datapoints with 0
-        reshaped, all_intervals, dynamic = reshape(measure, data, self.ticker, annual, reshape_approx, converted=converted) # _ is intervals, if the data has not been converted in the init, it will be here
+        reshaped, all_intervals, dynamic = reshape(measure, data, self.ticker, annual, reshape_approx, converted=converted, forced_static=forced_static) # _ is intervals, if the data has not been converted in the init, it will be here
         if intervals == None:
             intervals = all_intervals 
         if intervals == []:
             print(f"intervals empty for {measure}")
+        if forced_static:
+            dynamic = False
+            #We also have to swap the start and end because we want to agknowledge the data from the start
+            reshaped = {v[-1]['start']: [{**v[-1], 'end': k}] for k, v in reshaped.items()} 
         for k ,interval in enumerate(intervals): #To save compute we only get the data that we really need, could be intervals with gaps
             data_start, data_end = interval
             if dynamic:
@@ -1188,3 +1195,14 @@ def ticker_fill(company_frames_availability):
         else:
             ticker_list.append(ticker)
     return ticker_list
+
+def get_price_column(comp, availability, intervals=None):
+    static, dynamic = availability
+    if static:
+        static_frame, unit = comp.fact("EntityCommonStockSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1)
+    if dynamic:
+        dynamic_frame, unit = comp.fact("WeightedAverageNumberOfSharesOutstandingBasic", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1)
+        if dynamic_frame.empty:
+            dynamic_frame, unit = comp.fact("WeightedAverageNumberOfDilutedSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1)
+    
+    return static_frame
