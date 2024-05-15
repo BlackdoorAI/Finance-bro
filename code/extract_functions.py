@@ -13,6 +13,7 @@ from conversions import *
 from net_stuff import *
 from reshape import *
 
+
 FACTS_PATH = r"C:\Edgar_data"
 SUBMISSIONS_PATH = r"C:\Submissions_data"
 
@@ -316,7 +317,7 @@ class Stock:
                     self.missing[motion].append(measure)
             if self.measure_paths[motion] == {}:
                 return "del"  
-            overlap[motion] = calculate_overlap(self.date_dict[motion])   
+            overlap[motion] = calculate_overlap(self.date_dict[motion])
             if overlap[motion] != []:
                 success[motion] = 1
             else:
@@ -337,6 +338,7 @@ class Stock:
         self.overlap = overlap
         self.extreme_start = extreme_start
         self.extreme_end = extreme_end
+        self.price_methods = []
         #remove duplicates
         needed_measures = list(set(needed_measures))
         #Initialize the share value as well
@@ -344,6 +346,7 @@ class Stock:
             share_have = self.data.get(share_method, False)
             if share_have:
                 needed_measures.append(share_method)
+                self.price_methods.append(share_method)
         self.initialized_measures = standard_measures
         #Change the strings to datetime for the initialized measures
         #Flatten batches into a single DataFrame with an identifier
@@ -383,11 +386,17 @@ class Stock:
         self.fullprice = await yahoo_fetch(self.ticker, self.extreme_start, self.extreme_end, semaphore, RETRIES, START_RETRY_DELAY)
         if type(self.fullprice) == int:
             return 0
+        self.info = await yahoo_info_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
+        if type(self.info) == int:
+            return 0
+        self.splits = await yahoo_split_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
+        if type(self.splits) == int:
+            return 0
         Price = self.fullprice[["close", "adjclose"]].copy()
         self.price = Price.ffill().bfill()
         return 1 
     
-    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False, forced_static=0):
+    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False, forced_static=0, splits =pd.DataFrame()):
         """  
         If date_gather, then it returns a dataframe to allow recursive_fact to get the date.
         Returns a dataframe that has rows indexed row_delta away, with lookbehind columns that are column_delta away.
@@ -418,6 +427,8 @@ class Stock:
             else:
                 approx = False
             reshaped, intervals, dynamic = reshape(measure, point_list, self.ticker, converted=False, approx=approx)
+            if intervals == []:
+                return None
             return intervals
         if measure in self.converted_data:
             data= self.converted_data[measure]
@@ -445,6 +456,65 @@ class Stock:
             dynamic = False
             #We also have to swap the start and end because we want to agknowledge the data from the start
             reshaped = {v[-1]['start']: [{**v[-1], 'end': k}] for k, v in reshaped.items()} 
+            if type(splits) == str:
+                #Figure out a filtration without splits, you can basicaly just check that changes aren't too ridiculously drastic 
+                pass
+            elif not splits.empty:
+                #If we are getting the share data and we recieved the splits frame
+                #The split is always between the first date and onward 
+                current_shares = self.info.get('sharesOutstanding') 
+                reshaped[pd.Timestamp.now()] = [{"val": current_shares, "start": pd.Timestamp.now(), "filed": pd.Timestamp.now()}] #This is our anchor to reality, we know this needs to be treu and then we can check the rest relative to this
+                iterator = list(reshaped.items()) 
+                errors = []
+                index = len(iterator) - 1  # Start from the end of the list
+                gap = 1
+                #Prev things are the things previously in time but ahead in the iteration
+                while index - gap >= 0:  # Ensure index is within the bounds of the list
+                    date, point_list = iterator[index]
+                    pos = splits.index.searchsorted(date, side='right') - 1  # Find the closest split before or at date
+                    value = point_list[0]["val"]
+                    prev_date, prev_point_list = iterator[index - gap]
+                    prev_value = prev_point_list[0]["val"]
+                    if pos >= 0 and prev_date < splits.index[pos]:  # Check if there is a split between the date and prev_date
+                        current_split_string = splits.iloc[pos]["splitRatio"]
+                        parts = current_split_string.split(":")
+                        current_split = int(parts[0]) / int(parts[1])
+                    else:
+                        current_split = 1  # No split affects this period
+                    ratio = value / prev_value
+                    if current_split * 0.9 < ratio < current_split * 1.1:  # Check if the ratio is withing bounds of the split that is expected
+                        index -= gap  # Move to the next item (backwards)
+                        gap = 1
+                    else:
+                        errors.append(date) 
+                        gap += 1  # Increase gap to skip further back
+            #FORWARD
+            # iterator = list(reshaped.items())
+            # errors = []
+            # index = 0
+            # gap = 1
+            # while(index < len(reshaped)):
+            #     date, point_list = iterator[index]
+            #     pos = splits.index.searchsorted(date)
+            #     value = point_list[0]["val"]
+            #     next_date, next_point_list = iterator[index+gap]
+            #     next_value = next_point_list[0]["val"]
+            #     if pos < len(splits.index) and next_date > splits.index[pos]: #This means the split is supposed to be inside this period
+            #         current_split_string = splits.iloc[pos]["splitRatio"]
+            #         parts = current_split_string.split(":")
+            #         current_split = int(parts[0])/int(parts[1])
+            #     else: 
+            #         current_split = 1 #In this scenario there are no stock splits expected in this period 
+            #     ratio = next_value/value
+            #     if current_split * 0.9 < ratio < current_split * 1.1: #Okay
+            #         index += gap
+            #         gap = 1
+            #     else:
+            #         errors.append(next_date)
+            #         gap +=1 
+            #         if index + gap > len(iterator) - 1:
+            #             break
+        
         for k ,interval in enumerate(intervals): #To save compute we only get the data that we really need, could be intervals with gaps
             data_start, data_end = interval
             if dynamic:
@@ -800,7 +870,7 @@ def path_finder(paths, constituent=False):
     if constituent:
         intervals = [constit[1] for constit in paths]
         overlap = calculate_overlap(intervals)
-        if overlap == None:
+        if overlap == []:
             return None
         needed_list = []
         for constit in paths:
@@ -908,6 +978,8 @@ def path_finder(paths, constituent=False):
             else: 
                 current_end = best_end
                 concat_paths.append((best[0], (best_start,best_end)))
+                if idx == len(sorted_paths) -1:
+                    intervals.append((total_start, best_end))
                 needed_measures += best_needed
         if intervals == []: #If we also used the last interval we still have to append it 
             intervals.append((total_start, current_end))
@@ -1070,16 +1142,16 @@ def recursive_date_gather(comp, measure, motion, depth=0, path_date=None, approx
     if depth ==0:
         if path_date["del"] == True:
             return path_date
-        paths = path_finder(paths)
-        path_date["paths"] = paths
+        found_paths = path_finder(paths)
+        path_date["paths"] = found_paths
         return path_date    
     
     if paths == []:
         return None
-    paths = path_finder(paths)
-    if paths != None:
-        comp.measures_and_intervals[motion][measure] = paths[1]
-    return paths
+    found_paths = path_finder(paths)
+    if found_paths != None:
+        comp.measures_and_intervals[motion][measure] = found_paths[1]
+    return found_paths
 
 def get_category(sic):
     for category, number_ranges in categories.items():
@@ -1199,10 +1271,10 @@ def ticker_fill(company_frames_availability):
 def get_price_column(comp, availability, intervals=None):
     static, dynamic = availability
     if static:
-        static_frame, unit = comp.fact("EntityCommonStockSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1)
+        static_frame, unit = comp.fact("EntityCommonStockSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, splits = comp.splits)
     if dynamic:
-        dynamic_frame, unit = comp.fact("WeightedAverageNumberOfSharesOutstandingBasic", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1)
+        dynamic_frame, unit = comp.fact("WeightedAverageNumberOfSharesOutstandingBasic", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1, splits = comp.splits)
         if dynamic_frame.empty:
-            dynamic_frame, unit = comp.fact("WeightedAverageNumberOfDilutedSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1)
+            dynamic_frame, unit = comp.fact("WeightedAverageNumberOfDilutedSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1, splits = comp.splits)
     
     return static_frame

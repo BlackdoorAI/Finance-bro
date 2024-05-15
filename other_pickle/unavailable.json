@@ -1,13 +1,366 @@
 {
  "Uncategorized": {},
  "Agriculture": {},
- "Oil and Construction": {},
- "Household and Property consumables": {},
- "Manufacturing, Technology and Heavy Machinery": {},
- "Transportation and Communication": {},
- "Wholesale and Retail": {},
- "Banking and Finance": {},
- "Services": {},
+ "Oil and Construction": {
+  "XOM - Petroleum Refining": [
+   "Goodwill",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit"
+  ],
+  "CVX - Petroleum Refining": [
+   "GrossProfit",
+   "OperatingIncomeLoss"
+  ],
+  "SHEL - Crude Petroleum & Natural Gas": [
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "InventoryNet",
+   "LongTermDebt",
+   "PropertyPlantAndEquipmentNet",
+   "ShortTermBorrowings",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "DepreciationAndAmortization",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "OperatingIncomeLoss",
+   "Revenues",
+   "FreeCashFlow"
+  ],
+  "TTE - Crude Petroleum & Natural Gas": [
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "InventoryNet",
+   "LongTermDebt",
+   "PropertyPlantAndEquipmentNet",
+   "ShortTermBorrowings",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "DepreciationAndAmortization",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "OperatingIncomeLoss",
+   "Revenues",
+   "FreeCashFlow"
+  ]
+ },
+ "Household and Property consumables": {
+  "JNJ - Pharmaceutical Preparations": [
+   "IncomeTaxesPaidNet"
+  ],
+  "PG - Soap, Detergents, Cleang Preparations, Perfumes, Cosmetics": [
+   "GrossProfit",
+   "IncomeTaxesPaidNet"
+  ],
+  "MRK - Pharmaceutical Preparations": [
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "OperatingIncomeLoss"
+  ],
+  "ABBV - Pharmaceutical Preparations": [
+   "IncomeTaxesPaidNet"
+  ],
+  "KO - Beverages": [
+   "IncomeTaxesPaidNet"
+  ],
+  "AZN - Pharmaceutical Preparations": [
+   "EntityCommonStockSharesOutstanding",
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "InventoryNet",
+   "LongTermDebt",
+   "PropertyPlantAndEquipmentNet",
+   "ShortTermBorrowings",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "DepreciationAndAmortization",
+   "EarningsPerShareDiluted",
+   "IncomeTaxesPaidNet",
+   "OperatingIncomeLoss",
+   "Revenues",
+   "FreeCashFlow"
+  ],
+  "NVS - Pharmaceutical Preparations": [
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "InventoryNet",
+   "LongTermDebt",
+   "PropertyPlantAndEquipmentNet",
+   "ShortTermBorrowings",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "DepreciationAndAmortization",
+   "EarningsPerShareDiluted",
+   "IncomeTaxesPaidNet",
+   "OperatingIncomeLoss",
+   "Revenues",
+   "FreeCashFlow"
+  ],
+  "LIN - Industrial Inorganic Chemicals": [
+   "CostsAndExpenses",
+   "GrossProfit",
+   "IncomeTaxesPaidNet",
+   "Revenues"
+  ],
+  "PFE - Pharmaceutical Preparations": [
+   "GrossProfit"
+  ],
+  "AMGN - Biological Products, (No Diagnostic Substances)": [
+   "IncomeTaxesPaidNet"
+  ]
+ },
+ "Manufacturing, Technology and Heavy Machinery": {
+  "TSLA - Motor Vehicles & Passenger Car Bodies": [
+   "IncomeTaxesPaidNet"
+  ],
+  "TMO - Measuring & Controlling Devices, NEC": [
+   "IncomeTaxesPaidNet"
+  ],
+  "NKE - Rubber & Plastics Footwear": [
+   "CostsAndExpenses",
+   "IncomeTaxesPaidNet",
+   "OperatingIncomeLoss"
+  ],
+  "QCOM - Radio & Tv Broadcasting & Communications Equipment": [
+   "GrossProfit"
+  ]
+ },
+ "Transportation and Communication": {
+  "TMUS - Radiotelephone Communications": [
+   "GrossProfit"
+  ],
+  "CMCSA - Cable & Other Pay Television Services": [
+   "LongTermDebt",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit"
+  ],
+  "VZ - Telephone Communications (No Radiotelephone)": [
+   "GrossProfit"
+  ],
+  "UNP - Railroads, Line-Haul Operating": [
+   "Goodwill",
+   "CostOfGoodsAndServicesSold"
+  ],
+  "UPS - Trucking & Courier Services (No Air)": [
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit",
+   "IncomeTaxesPaidNet"
+  ],
+  "NEE - Electric Services": [
+   "AccountsPayableCurrent",
+   "CostOfGoodsAndServicesSold",
+   "FreeCashFlow"
+  ]
+ },
+ "Wholesale and Retail": {
+  "WMT - Retail-Variety Stores": [
+   "GrossProfit"
+  ],
+  "MCD - Retail-Eating  Places": [
+   "GrossProfit",
+   "IncomeTaxesPaidNet"
+  ]
+ },
+ "Banking and Finance": {
+  "BRK-B - Fire, Marine & Casualty Insurance": [
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "LiabilitiesCurrent",
+   "LongTermDebt",
+   "AssetsNoncurrent",
+   "PropertyPlantAndEquipmentNet",
+   "ShortTermBorrowings",
+   "CostOfGoodsAndServicesSold",
+   "EarningsPerShareDiluted",
+   "GrossProfit"
+  ],
+  "JPM - National Commercial Banks": [
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "DepreciationAndAmortization",
+   "GrossProfit",
+   "OperatingIncomeLoss",
+   "FreeCashFlow"
+  ],
+  "UNH - Hospital & Medical Service Plans": [
+   "AccountsPayableCurrent",
+   "GrossProfit"
+  ],
+  "BAC - National Commercial Banks": [
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit",
+   "FreeCashFlow"
+  ],
+  "WFC - National Commercial Banks": [
+   "AccountsPayableCurrent",
+   "AssetsCurrent",
+   "CashAndCashEquivalentsAtCarryingValue",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit",
+   "FreeCashFlow"
+  ],
+  "HDB - Commercial Banks, NEC": [
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "NetIncomeLoss",
+   "OperatingIncomeLoss",
+   "Revenues",
+   "FreeCashFlow"
+  ],
+  "BX - Investment Advice": [
+   "AccountsPayableCurrent",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent"
+  ],
+  "MS - Security Brokers, Dealers & Flotation Companies": [
+   "AccountsPayableCurrent",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "EarningsPerShareDiluted",
+   "GrossProfit",
+   "NetIncomeLoss",
+   "OperatingIncomeLoss",
+   "Revenues",
+   "FreeCashFlow"
+  ],
+  "AXP - Finance Services": [
+   "AccountsPayableCurrent",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "DepreciationAndAmortization",
+   "GrossProfit",
+   "Revenues"
+  ],
+  "SCHW - Security Brokers, Dealers & Flotation Companies": [
+   "AccountsPayableCurrent",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit"
+  ],
+  "GS - Security Brokers, Dealers & Flotation Companies": [
+   "AccountsPayableCurrent",
+   "AccountsReceivableNet",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "LongTermDebt",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "GrossProfit",
+   "Revenues"
+  ],
+  "PLD - Real Estate Investment Trusts": [
+   "AccountsPayableCurrent",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "AssetsNoncurrent",
+   "CostOfGoodsAndServicesSold"
+  ],
+  "BLK - Security Brokers, Dealers & Flotation Companies": [
+   "AccountsPayableCurrent",
+   "AssetsCurrent",
+   "InventoryNet",
+   "LiabilitiesCurrent",
+   "CostOfGoodsAndServicesSold",
+   "CostsAndExpenses",
+   "Revenues"
+  ]
+ },
+ "Services": {
+  "GOOGL - Services-Computer Programming, Data Processing, Etc.": [
+   "GrossProfit"
+  ],
+  "META - Services-Computer Programming, Data Processing, Etc.": [
+   "GrossProfit"
+  ],
+  "V - Services-Business Services, NEC": [
+   "CostOfGoodsAndServicesSold",
+   "EarningsPerShareDiluted",
+   "GrossProfit"
+  ],
+  "MA - Services-Business Services, NEC": [
+   "CostOfGoodsAndServicesSold",
+   "IncomeTaxesPaidNet"
+  ],
+  "ORCL - Services-Prepackaged Software": [
+   "IncomeTaxesPaidNet"
+  ],
+  "ACN - Services-Business Services, NEC": [
+   "LongTermDebt",
+   "GrossProfit"
+  ],
+  "NFLX - Services-Video Tape Rental": [
+   "AccountsReceivableNet",
+   "Goodwill",
+   "IncomeTaxesPaidNet"
+  ],
+  "PDD - Services-Business Services, NEC": [
+   "AccountsReceivableNet",
+   "Goodwill",
+   "LongTermDebt",
+   "ShortTermBorrowings",
+   "CostsAndExpenses",
+   "IncomeTaxesPaidNet",
+   "NetIncomeLoss",
+   "OperatingIncomeLoss",
+   "Revenues"
+  ],
+  "INTU - Services-Prepackaged Software": [
+   "IncomeTaxesPaidNet"
+  ],
+  "DIS - Services-Miscellaneous Amusement & Recreation": [
+   "CostOfGoodsAndServicesSold",
+   "GrossProfit",
+   "IncomeTaxesPaidNet"
+  ],
+  "UBER - Services-Business Services, NEC": [
+   "GrossProfit"
+  ]
+ },
  "Science and Healthcare": {},
  "Non-Operating": {}
 }

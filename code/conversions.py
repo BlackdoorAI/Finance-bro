@@ -136,7 +136,7 @@ shit_approximates = ["ApproxFreeCashFlow", "LongTermDebt", "AssetsNoncurrent", "
 
 dynamic_fuckers = ["ShortTermDebtWeightedAverageInterestRate"]
 
-annual_measures = ["IncomeTaxesPaidNet", "DepreciationAndAmortization", "Depreciation", "AmortizationOfIntangibleAssets", "DepreciationDepletionAndAmortization"]
+annual_measures = ["IncomeTaxesPaidNet", "DepreciationAndAmortization", "Depreciation", "AmortizationOfIntangibleAssets", "DepreciationDepletionAndAmortization","IncomeTaxesPaid"]
 
 shares_ways = ["EntityCommonStockSharesOutstanding", "EntityPublicFloat", "WeightedAverageNumberOfSharesOutstandingBasic", "WeightedAverageNumberOfDilutedSharesOutstanding"]
 #used in unitrun

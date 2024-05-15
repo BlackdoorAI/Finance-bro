@@ -4,6 +4,7 @@ from fredapi import Fred
 import requests
 import pandas as pd
 import yahoo_fin.stock_info as si
+import yfinance as yf
 
 fred = Fred(api_key='0c34c4dd2fd6943f6549f1c990a8a0f0') 
 
@@ -65,6 +66,38 @@ async def yahoo_fetch(ticker, start_year, end_year, semaphore, max_retries, star
                 await asyncio.sleep(attempt*start_retry_delay)
         return 0
     
+async def yahoo_info_fetch(ticker, max_retries, start_retry_delay):
+    stock = yf.Ticker(ticker)
+    info = 0
+    for attempt in range(max_retries + 1):
+        try:
+            # Access the info property directly in a thread to avoid blocking the asyncio loop
+            info = await asyncio.to_thread(lambda: stock.info)
+            break  
+        except requests.exceptions.ConnectionError as ce:
+            print(f"Share yahoo connection error: {ce} {ticker}")
+            await asyncio.sleep(attempt * start_retry_delay)  # Implement exponential backoff
+        except Exception as e:
+            print(f"Share yahoo error: {e} {ticker}")
+            return 0  
+    return info
+
+async def yahoo_split_fetch(ticker, max_retries, start_retry_delay):
+    splits = 0
+    for attempt in range(max_retries + 1):
+        try:
+            splits = await asyncio.to_thread(si.get_splits, ticker)
+            break  
+        except requests.exceptions.ConnectionError as ce:
+            print(f"Split yahoo connection error: {ce} {ticker}")
+            await asyncio.sleep(attempt * start_retry_delay)  # Implement exponential backoff
+        except AssertionError:
+            return "nosplit"
+        except Exception as e:
+            print(f"Split yahoo error: {e} {ticker}")
+            return 0  
+    return splits
+
 TIMEOUT = 8
 RETRIES = 2
 START_RETRY_DELAY = 3
