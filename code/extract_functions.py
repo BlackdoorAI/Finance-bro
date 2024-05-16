@@ -249,6 +249,10 @@ async def companysubmissions(ticker:str, client, semaphore):
     facts = await fetch(data_url, headers, semaphore, client, TIMEOUT,RETRIES,START_RETRY_DELAY)
     return facts
 
+def ratio_to_int(ratio:str):
+    parts = ratio.split(":")
+    current_split = int(parts[0]) / int(parts[1])
+    return current_split
 
 class Stock:
     def __init__(self, ticker:str, standard_measures):
@@ -340,14 +344,16 @@ class Stock:
         self.extreme_start = extreme_start
         self.extreme_end = extreme_end
         self.price_methods = []
+        self.share_availability = [0,0]
         #remove duplicates
         needed_measures = list(set(needed_measures))
         #Initialize the share value as well
-        for share_method in ["EntityCommonStockSharesOutstanding", "WeightedAverageNumberOfSharesOutstandingBasic"]:
+        for share_method, dynamic in [("EntityCommonStockSharesOutstanding",0),  ("WeightedAverageNumberOfSharesOutstandingBasic",1), ("WeightedAverageNumberOfDilutedSharesOutstanding",1)]:
             share_have = self.data.get(share_method, False)
             if share_have:
                 needed_measures.append(share_method)
                 self.price_methods.append(share_method)
+                self.share_availability[dynamic] = 1
         self.initialized_measures = standard_measures
         #Change the strings to datetime for the initialized measures
         #Flatten batches into a single DataFrame with an identifier
@@ -381,7 +387,7 @@ class Stock:
             self.sic = data["sic"]
             self.sicDescription = data["sicDescription"]
             return 1
-        
+    
     async def price_init(self,semaphore):
         #Get the price and set the self.price
         self.fullprice = await yahoo_fetch(self.ticker, self.extreme_start, self.extreme_end, semaphore, RETRIES, START_RETRY_DELAY)
@@ -390,9 +396,12 @@ class Stock:
         self.info = await yahoo_info_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
         if type(self.info) == int:
             return 0
-        self.splits = await yahoo_split_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
-        if type(self.splits) == int:
+        splits = await yahoo_split_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
+        if type(splits) == int:
             return 0
+        if not splits.empty:
+            splits["splitRatio"] = splits["splitRatio"].apply(ratio_to_int)
+        self.splits = splits
         Price = self.fullprice[["close", "adjclose"]].copy()
         self.price = Price.ffill().bfill()
         return 1 
@@ -423,7 +432,12 @@ class Stock:
             point_list, unit = unitrun(data["units"], self.ticker)
             if point_list == False:
                 return "del"
-            if measure in annual_measures:
+            annual_flag = False
+            for annual_measure in annual_measures:
+                if measure in measure_conversion.get(annual_measure,[]) or measure in approximate_measure_conversion.get(annual_measure,[]):
+                    annual_flag = True
+                    break
+            if measure in annual_measures or annual_flag:
                 approx = True
             else:
                 approx = False
@@ -473,13 +487,11 @@ class Stock:
             while index - gap >= 0:  # Ensure index is within the bounds of the list
                 date, point_list = iterator[index]
                 pos = splits.index.searchsorted(date, side='right') - 1  # Find the closest split before or at date
-                value = point_list[0]["val"]
+                value = point_list[-1]["val"]
                 prev_date, prev_point_list = iterator[index - gap]
-                prev_value = prev_point_list[0]["val"]
+                prev_value = prev_point_list[-1]["val"]
                 if pos >= 0 and prev_date < splits.index[pos]:  # Check if there is a split between the date and prev_date
-                    current_split_string = splits.iloc[pos]["splitRatio"]
-                    parts = current_split_string.split(":")
-                    current_split = int(parts[0]) / int(parts[1])
+                    current_split = splits.iloc[pos]["splitRatio"]
                     insertions.append({splits.index[pos]:[{"val":value, "filed": pd.Timestamp.now()}]}) #We just extend the value that we already have backwards to the split date
                 else:
                     current_split = 1  # No split affects this period
@@ -494,9 +506,18 @@ class Stock:
 
             for error in errors:
                 del reshaped[error]
-            for insertion in insertions:
-                reshaped.update(insertion)
-            reshaped = dict(sorted(reshaped.items())) #Maintain order
+            # for insertion in insertions:
+            #     reshaped.update(insertion)
+            # reshaped = dict(sorted(reshaped.items())) #Maintain order
+
+            #Here we multiply back to get the shares adjusted for splits 
+            iterator = list(reshaped.items())
+            for date, list_of_dict in iterator:
+                pos = splits.index.searchsorted(date, side='right')
+                split_multiple = splits.iloc[pos:]["splitRatio"].prod()
+                for i, datapoint in enumerate(list_of_dict):
+                    datapoint["val"] = datapoint["val"] * split_multiple
+                    reshaped[date][i] = datapoint
 
         for k ,interval in enumerate(intervals): #To save compute we only get the data that we really need, could be intervals with gaps
             data_start, data_end = interval
@@ -1251,8 +1272,12 @@ def ticker_fill(company_frames_availability):
             ticker_list.append(ticker)
     return ticker_list
 
-def get_price_column(comp, availability, intervals=None):
-    static, dynamic = availability
+def get_price_column(comp, intervals=None):
+    if comp.foreign:
+        print("Cannot use ADR for foreign companies")
+        return pd.DataFrame()
+    static = comp.share_availability[0]
+    dynamic = comp.share_availability[1]
     static_have = False
     dynamic_have = False
     if static:
@@ -1270,11 +1295,14 @@ def get_price_column(comp, availability, intervals=None):
     if static_have and dynamic_have:
         dynamic_frame = frame_rename(dynamic_frame, "EntityCommonStockSharesOutstanding")
         frame = static_frame.combine_first(dynamic_frame)
-        return frame 
     elif static_have:
-        return static_frame
+        frame = static_frame
     elif dynamic_have:
-        return dynamic_frame
+        frame = frame_rename(dynamic_frame, "EntityCommonStockSharesOutstanding")
     else:
         print("Neither share method is available")
         return pd.DataFrame()
+    frame.ffill(inplace=True)
+    frame["MarketCap"] = frame["EntityCommonStockSharesOutstanding-0"] * comp.price["close"]
+    # frame.drop(columns="EntityCommonStockSharesOutstanding-0", inplace = True)
+    return frame
