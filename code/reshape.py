@@ -94,7 +94,7 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
                 candidates = [] #We will get all the ways to get the thing here and pick the one with the best filed date
                 for i,piece1 in enumerate(pieces,start=1):
                     for piece2 in pieces[i:]:
-                        if abs(piece1["dur"] - piece2["dur"]) <100: #If the periods have a difference representing a quarter
+                        if 10 < abs(piece1["dur"] - piece2["dur"]) <100: #If the periods have a difference representing a quarter
                             if piece1["dur"] > piece2["dur"]: #Piece one is the longer duration 
                                 if timediff(piece1["end"],piece2["end"]) <6: #If they match by their ends 
                                     if timediff(piece2["start"], wanted_end) <10: #Check if we are actually getting what we want

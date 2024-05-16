@@ -12,6 +12,7 @@ from functools import lru_cache
 from conversions import *
 from net_stuff import *
 from reshape import *
+import collections
 
 
 FACTS_PATH = r"C:\Edgar_data"
@@ -396,7 +397,7 @@ class Stock:
         self.price = Price.ffill().bfill()
         return 1 
     
-    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False, forced_static=0, splits =pd.DataFrame()):
+    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False, forced_static=0, share_filter=0):
         """  
         If date_gather, then it returns a dataframe to allow recursive_fact to get the date.
         Returns a dataframe that has rows indexed row_delta away, with lookbehind columns that are column_delta away.
@@ -456,65 +457,47 @@ class Stock:
             dynamic = False
             #We also have to swap the start and end because we want to agknowledge the data from the start
             reshaped = {v[-1]['start']: [{**v[-1], 'end': k}] for k, v in reshaped.items()} 
-            if type(splits) == str:
-                #Figure out a filtration without splits, you can basicaly just check that changes aren't too ridiculously drastic 
-                pass
-            elif not splits.empty:
-                #If we are getting the share data and we recieved the splits frame
-                #The split is always between the first date and onward 
-                current_shares = self.info.get('sharesOutstanding') 
-                reshaped[pd.Timestamp.now()] = [{"val": current_shares, "start": pd.Timestamp.now(), "filed": pd.Timestamp.now()}] #This is our anchor to reality, we know this needs to be treu and then we can check the rest relative to this
-                iterator = list(reshaped.items()) 
-                errors = []
-                index = len(iterator) - 1  # Start from the end of the list
-                gap = 1
-                #Prev things are the things previously in time but ahead in the iteration
-                while index - gap >= 0:  # Ensure index is within the bounds of the list
-                    date, point_list = iterator[index]
-                    pos = splits.index.searchsorted(date, side='right') - 1  # Find the closest split before or at date
-                    value = point_list[0]["val"]
-                    prev_date, prev_point_list = iterator[index - gap]
-                    prev_value = prev_point_list[0]["val"]
-                    if pos >= 0 and prev_date < splits.index[pos]:  # Check if there is a split between the date and prev_date
-                        current_split_string = splits.iloc[pos]["splitRatio"]
-                        parts = current_split_string.split(":")
-                        current_split = int(parts[0]) / int(parts[1])
-                    else:
-                        current_split = 1  # No split affects this period
-                    ratio = value / prev_value
-                    if current_split * 0.9 < ratio < current_split * 1.1:  # Check if the ratio is withing bounds of the split that is expected
-                        index -= gap  # Move to the next item (backwards)
-                        gap = 1
-                    else:
-                        errors.append(date) 
-                        gap += 1  # Increase gap to skip further back
-            #FORWARD
-            # iterator = list(reshaped.items())
-            # errors = []
-            # index = 0
-            # gap = 1
-            # while(index < len(reshaped)):
-            #     date, point_list = iterator[index]
-            #     pos = splits.index.searchsorted(date)
-            #     value = point_list[0]["val"]
-            #     next_date, next_point_list = iterator[index+gap]
-            #     next_value = next_point_list[0]["val"]
-            #     if pos < len(splits.index) and next_date > splits.index[pos]: #This means the split is supposed to be inside this period
-            #         current_split_string = splits.iloc[pos]["splitRatio"]
-            #         parts = current_split_string.split(":")
-            #         current_split = int(parts[0])/int(parts[1])
-            #     else: 
-            #         current_split = 1 #In this scenario there are no stock splits expected in this period 
-            #     ratio = next_value/value
-            #     if current_split * 0.9 < ratio < current_split * 1.1: #Okay
-            #         index += gap
-            #         gap = 1
-            #     else:
-            #         errors.append(next_date)
-            #         gap +=1 
-            #         if index + gap > len(iterator) - 1:
-            #             break
-        
+        if share_filter:
+            #If there are on splits this is just an empty frame and everything defaults to 1
+            splits = self.splits
+            #If we are getting the share data and we recieved the splits frame
+            #The split is always between the first date and onward 
+            current_shares = self.info.get('sharesOutstanding') 
+            reshaped[pd.Timestamp.now()] = [{"val": current_shares, "start": pd.Timestamp.now(), "filed": pd.Timestamp.now()}] #This is our anchor to reality, we know this needs to be treu and then we can check the rest relative to this
+            iterator = list(reshaped.items()) 
+            insertions = [] #We need to accelerate the split faster then when its reported by inserting before it
+            errors = []
+            index = len(iterator) - 1  # Start from the end of the list
+            gap = 1
+            #Prev things are the things previously in time but ahead in the iteration
+            while index - gap >= 0:  # Ensure index is within the bounds of the list
+                date, point_list = iterator[index]
+                pos = splits.index.searchsorted(date, side='right') - 1  # Find the closest split before or at date
+                value = point_list[0]["val"]
+                prev_date, prev_point_list = iterator[index - gap]
+                prev_value = prev_point_list[0]["val"]
+                if pos >= 0 and prev_date < splits.index[pos]:  # Check if there is a split between the date and prev_date
+                    current_split_string = splits.iloc[pos]["splitRatio"]
+                    parts = current_split_string.split(":")
+                    current_split = int(parts[0]) / int(parts[1])
+                    insertions.append({splits.index[pos]:[{"val":value, "filed": pd.Timestamp.now()}]}) #We just extend the value that we already have backwards to the split date
+                else:
+                    current_split = 1  # No split affects this period
+                ratio = value / prev_value
+                # print(current_split, ratio)
+                if current_split * (0.85 - gap*0.05) < ratio < current_split * (1.15 + gap*0.05):  # Check if the ratio is withing bounds of the split that is expected, it increases with the gap that has happened
+                    index -= gap  # Move to the next item (backwards)
+                    gap = 1
+                else:
+                    errors.append(prev_date)
+                    gap += 1  # Increase gap to skip further back
+
+            for error in errors:
+                del reshaped[error]
+            for insertion in insertions:
+                reshaped.update(insertion)
+            reshaped = dict(sorted(reshaped.items())) #Maintain order
+
         for k ,interval in enumerate(intervals): #To save compute we only get the data that we really need, could be intervals with gaps
             data_start, data_end = interval
             if dynamic:
@@ -1270,11 +1253,28 @@ def ticker_fill(company_frames_availability):
 
 def get_price_column(comp, availability, intervals=None):
     static, dynamic = availability
+    static_have = False
+    dynamic_have = False
     if static:
-        static_frame, unit = comp.fact("EntityCommonStockSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, splits = comp.splits)
+        static_frame, unit = comp.fact("EntityCommonStockSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, share_filter = 1)
+        if not static_frame.empty:
+            static_have = True
     if dynamic:
-        dynamic_frame, unit = comp.fact("WeightedAverageNumberOfSharesOutstandingBasic", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1, splits = comp.splits)
+        dynamic_frame, unit = comp.fact("WeightedAverageNumberOfSharesOutstandingBasic", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1, share_filter = 1)
         if dynamic_frame.empty:
-            dynamic_frame, unit = comp.fact("WeightedAverageNumberOfDilutedSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1, splits = comp.splits)
-    
-    return static_frame
+            dynamic_frame, unit = comp.fact("WeightedAverageNumberOfDilutedSharesOutstanding", intervals = intervals, static_tolerance=pd.Timedelta(days=10000), lookbehind = 1, forced_static = 1, share_filter = 1)
+            if not dynamic_frame.empty:
+                dynamic_have = True
+        else:
+            dynamic_have = True
+    if static_have and dynamic_have:
+        dynamic_frame = frame_rename(dynamic_frame, "EntityCommonStockSharesOutstanding")
+        frame = static_frame.combine_first(dynamic_frame)
+        return frame 
+    elif static_have:
+        return static_frame
+    elif dynamic_have:
+        return dynamic_frame
+    else:
+        print("Neither share method is available")
+        return pd.DataFrame()

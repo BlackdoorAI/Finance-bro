@@ -92,7 +92,7 @@ async def yahoo_split_fetch(ticker, max_retries, start_retry_delay):
             print(f"Split yahoo connection error: {ce} {ticker}")
             await asyncio.sleep(attempt * start_retry_delay)  # Implement exponential backoff
         except AssertionError:
-            return "nosplit"
+            return pd.DataFrame() #Return something where there are no splits 
         except Exception as e:
             print(f"Split yahoo error: {e} {ticker}")
             return 0  
