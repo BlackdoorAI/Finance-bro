@@ -98,6 +98,23 @@ async def yahoo_split_fetch(ticker, max_retries, start_retry_delay):
             return 0  
     return splits
 
+async def yahoo_dividend_fetch(ticker, max_retries, start_retry_delay):
+    splits = 0
+    for attempt in range(max_retries + 1):
+        try:
+            splits = await asyncio.to_thread(si.get_dividends, ticker)
+            break  
+        except requests.exceptions.ConnectionError as ce:
+            print(f"Dividend yahoo connection error: {ce} {ticker}")
+            await asyncio.sleep(attempt * start_retry_delay)  # Implement exponential backoff
+        # except AssertionError:
+        #     return pd.DataFrame() #Return something where there are no splits 
+        # except Exception as e:
+        #     print(f"Dividend yahoo error: {e} {ticker}")
+        #     return 0  
+    return splits
+
+
 TIMEOUT = 8
 RETRIES = 2
 START_RETRY_DELAY = 3

@@ -399,6 +399,9 @@ class Stock:
         splits = await yahoo_split_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
         if type(splits) == int:
             return 0
+        self.dividends = await yahoo_dividend_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
+        if type(self.dividends) == int:
+            return 0
         if not splits.empty:
             splits["splitRatio"] = splits["splitRatio"].apply(ratio_to_int)
         self.splits = splits
@@ -495,9 +498,14 @@ class Stock:
                     insertions.append({splits.index[pos]:[{"val":value, "filed": pd.Timestamp.now()}]}) #We just extend the value that we already have backwards to the split date
                 else:
                     current_split = 1  # No split affects this period
+                if prev_value < 1:
+                    errors.append(prev_date)
+                    gap += 1  
+                    continue
                 ratio = value / prev_value
-                # print(current_split, ratio)
-                if current_split * (0.85 - gap*0.05) < ratio < current_split * (1.15 + gap*0.05):  # Check if the ratio is withing bounds of the split that is expected, it increases with the gap that has happened
+                if not forced_static:
+                    print(current_split, ratio)
+                if current_split * (0.80 - gap*0.05) < ratio < current_split * (1.20 + gap*0.05):  # Check if the ratio is withing bounds of the split that is expected, it increases with the gap that has happened
                     index -= gap  # Move to the next item (backwards)
                     gap = 1
                 else:
@@ -514,7 +522,10 @@ class Stock:
             iterator = list(reshaped.items())
             for date, list_of_dict in iterator:
                 pos = splits.index.searchsorted(date, side='right')
-                split_multiple = splits.iloc[pos:]["splitRatio"].prod()
+                if pos > 0:
+                    split_multiple = splits.iloc[pos:]["splitRatio"].prod()
+                else:
+                    split_multiple = 1
                 for i, datapoint in enumerate(list_of_dict):
                     datapoint["val"] = datapoint["val"] * split_multiple
                     reshaped[date][i] = datapoint
@@ -1272,7 +1283,7 @@ def ticker_fill(company_frames_availability):
             ticker_list.append(ticker)
     return ticker_list
 
-def get_price_column(comp, intervals=None):
+def get_price_column(comp, intervals=None, dividends=False):
     if comp.foreign:
         print("Cannot use ADR for foreign companies")
         return pd.DataFrame()
@@ -1304,5 +1315,13 @@ def get_price_column(comp, intervals=None):
         return pd.DataFrame()
     frame.ffill(inplace=True)
     frame["MarketCap"] = frame["EntityCommonStockSharesOutstanding-0"] * comp.price["close"]
-    # frame.drop(columns="EntityCommonStockSharesOutstanding-0", inplace = True)
-    return frame
+    frame.drop(columns="EntityCommonStockSharesOutstanding-0", inplace = True)
+    if dividends: #This is really kind of obsolete, ist just a fun way to get the real historical market cap
+        if not comp.dividends.empty:
+            comp.dividends["multiplier"] = (comp.dividends["dividend"]/comp.price["close"] + 1)
+            multipliers = comp.dividends["multiplier"]
+            multipliers.dropna(inplace=True)
+            adjustments = pd.Series(1, index=frame.index.union(multipliers.index))  
+            adjustments.loc[multipliers.index] = multipliers
+            frame['MarketCap'] *= adjustments[::-1].cumprod()[::-1]
+    return frame        
