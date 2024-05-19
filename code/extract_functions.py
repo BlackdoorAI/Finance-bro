@@ -689,20 +689,18 @@ def operate(comp, frames, frame_names, operation, measure, dynamic, approx, appr
         # Identify new intervals based on the 100-day threshold
         new_interval = date_diff > 100
         # Identify start dates for intervals directly from the index
-        start_dates = frame.index[new_interval | (frame.index == frame.index[0])]
+        first_valid_index = frame.apply(pd.Series.first_valid_index).min()
+        start_dates = frame.index[new_interval | (frame.index == first_valid_index)]
         
         # Calculate end dates by shifting start dates directly in the index
-        new_interval_indices = new_interval[new_interval].index
+        new_interval_indices = new_interval[new_interval | (frame.index == first_valid_index)].index
     
-        # Calculate end dates by accessing the previous index directly
+        # We ignore the first start and then add the last starts end at the end
         end_dates = []
-        for idx in new_interval_indices:
+        for idx in new_interval_indices[1:]: 
             # Find the position of the current index and access the previous index unless it's the first index
             pos = frame.index.get_loc(idx)
-            if pos > 0:
-                end_dates.append(frame.index[pos - 1])
-            else:
-                end_dates.append(frame.index[pos])
+            end_dates.append(frame.index[pos - 1])
         if frame.index[-1] not in end_dates:
             end_dates.append(frame.index[-1])
         # Combine into a list of tuples
@@ -1246,8 +1244,8 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
             if measure not in comp.missing[motion]:
                 print(f"{comp.ticker} Getting {measure}")
                 print(comp.measure_paths[motion][measure])
-                intervals = comp.measures_and_intervals[motion][measure]
-                data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], dynamic, intervals, row_delta , column_delta , static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                # intervals = comp.measures_and_intervals[motion][measure]
+                data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], dynamic, None, row_delta , column_delta , static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
                 data.name = measure
                 frames_dict[motion].append(data)
                 unit_dict[motion].append(unit)
@@ -1278,11 +1276,13 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
             new_index = pd.DatetimeIndex([date for date in full_index if date not in dates_to_remove_set]) 
             
             frame_list = []
-            for frame in frames_dict[motion][1:]:
-                frame = frame.reindex(new_index, method='nearest', limit=4)
+            for frame in frames_dict[motion]:
+                frame = frame.reindex(new_index, method='nearest', limit=6)
                 frame_list.append(frame)
-            df[motion] = pd.concat(frame_list, axis =1, join="outer")
-
+            if frame_list != []:
+                df[motion] = pd.concat(frame_list, axis =1, join="outer")
+            else:
+                continue
         df[motion] = df[motion][comp.extreme_start[motion]:comp.extreme_end[motion]]
         #If units are necessary
         # columns_multiindex = pd.MultiIndex.from_tuples([(col, unit) for col, unit in zip(df.columns, unit_list)],names=['Variable', 'Unit'])
