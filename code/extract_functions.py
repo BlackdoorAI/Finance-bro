@@ -12,7 +12,7 @@ from functools import lru_cache
 from conversions import *
 from net_stuff import *
 from reshape import *
-import collections
+from collections import defaultdict
 
 
 FACTS_PATH = r"C:\Edgar_data"
@@ -125,7 +125,9 @@ def unitrun(dict, ticker, all=False, debug=False):
             return dict[unit], unit 
         except KeyError:
             continue
-    print(f"No unit available for {ticker}")
+    if all:
+        print(f"No unit at all available for {ticker}")
+    print(f"No USD like unit available for {ticker}")
     if debug: 
         units = []
         for key,value in dict.items():
@@ -434,6 +436,7 @@ class Stock:
                 return None
             point_list, unit = unitrun(data["units"], self.ticker)
             if point_list == False:
+                # print(list(data["units"].keys()))
                 return "del"
             annual_flag = False
             for annual_measure in annual_measures:
@@ -503,8 +506,8 @@ class Stock:
                     gap += 1  
                     continue
                 ratio = value / prev_value
-                if not forced_static:
-                    print(current_split, ratio)
+                # if not forced_static:
+                #     print(current_split, ratio)
                 if current_split * (0.80 - gap*0.05) < ratio < current_split * (1.20 + gap*0.05):  # Check if the ratio is withing bounds of the split that is expected, it increases with the gap that has happened
                     index -= gap  # Move to the next item (backwards)
                     gap = 1
@@ -659,27 +662,53 @@ def operate(comp, frames, frame_names, operation, measure, dynamic, approx, appr
                 for idx, value in enumerate(values[1:], start=1):
                     frame1, value = frame1.align(value, join="outer", axis=0)
                     values[idx] = value
+                result_frame = pd.DataFrame(index=frame1.index)
                 for i, col in enumerate(frame1.columns):
                     result_frame[f'{measure}-{i}'] = frame1[col]  # Initialize with frame1's columns {i - lookbehind +1}
-                result_frame["checker"] = 0
-                for frame in values:
-                    frame["checker"] = 1
-                    frame.apply(lambda row: 0 if row.isnull().any() else 1) #You can implement fractions
-                    frame.fillna(0, inplace = True)
-                result_frame = pd.DataFrame(index=frame1.index)
+                result_frame["checker"] = 1
                 for value in values[1:]:
-                    for i, col in enumerate(value.columns):
+                    value["checker"] = value.apply(lambda row: 0 if row.isnull().any() else 1, axis=1) #You can implement fractions
+                    value.fillna(0, inplace = True)
+                    for i, col in enumerate(value.columns[:-1]):
                         result_frame[f'{measure}-{i}'] = result_frame[f'{measure}-{i}'].add(value[col], fill_value = 0) #fill_value Specific for approx 
-                columns_to_replace = result_frame.columns  
-                final_frame = pd.DataFrame()
+                    result_frame["checker"] = result_frame["checker"].add(value["checker"], fill_value = 0)
+                columns_to_replace = result_frame.columns[:-1]  
+                final_frame = pd.DataFrame(index=result_frame.index)
                 for col in columns_to_replace:
-                    final_frame[col] = np.where(starting_frame["checker"] >= approx_needed, starting_frame[col], np.nan) #We want to keep the gaps in the frame for addition and stuff
+                    final_frame[col] = np.where(result_frame["checker"] >= approx_needed, result_frame[col], np.nan) #We want to keep the gaps in the frame for addition and stuff
                 return final_frame
     #First we find the intervals for the data that we have 
     intervals_list = []
-    for name in frame_names:
-        intervals = comp.measures_and_intervals["dynamic"][name] #We are in dynamic anyway
+    # for name in frame_names:
+        # intervals = comp.measures_and_intervals["dynamic"][name] #We are in dynamic anyway
+        # intervals_list.append(intervals)
+    for frame in frames:
+        # Calculate the difference in days directly from the index
+        date_diff = frame.index.to_series().diff().dt.days
+        
+        # Identify new intervals based on the 100-day threshold
+        new_interval = date_diff > 100
+        # Identify start dates for intervals directly from the index
+        start_dates = frame.index[new_interval | (frame.index == frame.index[0])]
+        
+        # Calculate end dates by shifting start dates directly in the index
+        new_interval_indices = new_interval[new_interval].index
+    
+        # Calculate end dates by accessing the previous index directly
+        end_dates = []
+        for idx in new_interval_indices:
+            # Find the position of the current index and access the previous index unless it's the first index
+            pos = frame.index.get_loc(idx)
+            if pos > 0:
+                end_dates.append(frame.index[pos - 1])
+            else:
+                end_dates.append(frame.index[pos])
+        if frame.index[-1] not in end_dates:
+            end_dates.append(frame.index[-1])
+        # Combine into a list of tuples
+        intervals = list(zip(start_dates, end_dates))
         intervals_list.append(intervals)
+
     frames_and_intervals = list(zip(frames,intervals_list))
     if not approx: 
         # calc the real overlap intervals then iterate through them and add the stuff back,
@@ -725,7 +754,7 @@ def operate(comp, frames, frame_names, operation, measure, dynamic, approx, appr
         starting_frame["checker"] = 0
         for frame in frames:
             frame["checker"] = 1
-            frame.apply(lambda row: 0 if row.isnull().any() else 1) #You can implement fractions
+            frame["checker"] = frame.apply(lambda row: 0 if row.isnull().any() else 1) #You can implement fractions
             frame.fillna(0, inplace = True)
         if operation == "add":
             for frame, intervals in frames_and_intervals:
@@ -766,9 +795,9 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
         elif root == "concat":
             fledgling, get_interval = tree[0]
             if intervals != None:
-                new_intervals = calculate_overlap([intervals, [get_interval]])
+                new_intervals = calculate_overlap([intervals, get_interval])
             else:
-                new_intervals = [get_interval]
+                new_intervals = get_interval
             if new_intervals != []:
                 concat_frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
             else:
@@ -776,11 +805,11 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
             for sapling in tree[1:]:
                 fledgling, get_interval = sapling
                 if intervals != None:
-                    new_intervals = calculate_overlap([intervals, [get_interval]])
+                    new_intervals = calculate_overlap([intervals, get_interval])
                     if new_intervals == []:
                         continue
                 else:
-                    new_intervals = [get_interval]
+                    new_intervals = get_interval
                 frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
                 if frame.empty:
                     continue
@@ -834,7 +863,7 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
             for sprout, tree_part in tree.items():
                 add_value, unit = path_selector(comp, sprout ,{sprout:tree_part}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
                 #Specifically for approx
-                add_value.fillna(0, inplace =True)
+                # add_value.fillna(0, inplace =True)
                 values.append(add_value)
                 frame_names.append(sprout)
             threshold = approximate_additive_conversion[measure][1] #Get the wanted threshold for the frames and shit
@@ -878,7 +907,7 @@ def calculate_overlap(list_of_interval_lists):
         if not common_intervals:  # No overlap left, early exit
             break
     return common_intervals
-    
+  
 def path_finder(paths, constituent=False):
     if paths == None:
         return None
@@ -923,7 +952,7 @@ def path_finder(paths, constituent=False):
                     first_end = end
                     first_needed = needed
                     first_index = i
-        concat_paths.append((first_path,(first_start,first_end)))
+        concat_paths.append((first_path,[(first_start,first_end)]))
         needed_measures += first_needed
         total_start = first_start
         current_end = first_end
@@ -955,8 +984,8 @@ def path_finder(paths, constituent=False):
                         best_start = start
                         best_end = end
                         best_needed = needed
-                        if route in concat_paths: #Prevent further tests and just add it in there, because we have already used it, the check means that we used an interval through the same method
-                            break
+                        # if route in concat_paths: #Prevent further tests and just add it in there, because we have already used it, the check means that we used an interval through the same method
+                        #     break
                     elif end == best_end and (len(needed)<len(best_needed)):
                         idx = k
                         best = route
@@ -978,7 +1007,7 @@ def path_finder(paths, constituent=False):
                             first_needed = needed
                             first_index = i
                 if first_end > current_end:
-                    concat_paths.append((first_path,(first_start,first_end)))
+                    concat_paths.append((first_path,[(first_start,first_end)]))
                     needed_measures += first_needed
                     total_start = first_start
                     current_end = first_end
@@ -992,14 +1021,35 @@ def path_finder(paths, constituent=False):
                     appended_flag = True
             else: 
                 current_end = best_end
-                concat_paths.append((best[0], (best_start,best_end)))
+                concat_paths.append((best[0], [(best_start,best_end)]))
                 if idx == len(sorted_paths) -1:
                     intervals.append((total_start, best_end))
                 needed_measures += best_needed
         if intervals == []: #If we also used the last interval we still have to append it 
             intervals.append((total_start, current_end))
 
-        return ({"concat":concat_paths}, intervals, list(set(needed_measures)))
+        # Sort tuples by the string representation of the identifier
+        concat_paths.sort(key=lambda x: str(x[0]))
+
+        # Assuming you want to just gather lists under the same key
+        combined_tuples = []
+        current_key = None
+        current_list = []
+
+        for key, lst in concat_paths:
+            if key != current_key:
+                if current_key is not None:
+                    combined_tuples.append((current_key, current_list))
+                current_key = key
+                current_list = lst[:]
+            else:
+                current_list.extend(lst)
+
+        # Don't forget to add the last group if it exists
+        if current_list:
+            combined_tuples.append((current_key, current_list))
+
+        return ({"concat":combined_tuples}, intervals, list(set(needed_measures)))
     
 #list({json.dumps(d, sort_keys=True): d for d in concat_paths}.values())
 def analyze_structure(structure, depth=1):
@@ -1029,8 +1079,16 @@ def analyze_structure(structure, depth=1):
         return max_depth + total_elements
     return max_depth, total_elements
 
+def calculate_total_duration(intervals):
+    total_duration = pd.Timedelta(days=0)  # Initialize total_duration to zero
+    for start, end in intervals:
+        if end > start:  # Ensure the end time is after the start time
+            duration = end - start
+            total_duration += duration  # Add the duration of this interval to the total
+    return total_duration
+
 #Used: {"conversion":["bla", "blabla"], "addition":[blabla]}
-def recursive_date_gather(comp, measure, motion, depth=0, path_date=None, approx = True, used=None, printout =False):
+def recursive_date_gather(comp, measure, motion, depth=0, path_date=None, approx = True, printout =False):
     #path = ("first_step", "second_step"...)
     #The whole thing returns the best path with the date that you get
     #Individual calls return the best dates and the measures needed to get it as a tuple
@@ -1044,9 +1102,7 @@ def recursive_date_gather(comp, measure, motion, depth=0, path_date=None, approx
     if depth ==0:
         if path_date is None:
             path_date = {"del": False, "paths":[], "ignored":[]}
-        if used is None:
-            used = {"conversion":[],"approx_conversion":[],"add":[],"approx_add":[],"sub":[]}
-    if depth>5:
+    if depth>4:
         return None
     if printout:
         print(f"Entering recursive with {measure}")
@@ -1069,91 +1125,81 @@ def recursive_date_gather(comp, measure, motion, depth=0, path_date=None, approx
             paths.append((True,dates,[measure]))
         
     if measure in measure_conversion:
-        if measure not in used["conversion"]:
-            used["conversion"].append(measure)
-            for replacement in measure_conversion[measure]:
-                path = recursive_date_gather(comp, replacement, motion, depth+1, path_date, approx, used, printout)
-                # path = path_finder(path)
-                if path != None:
-                    paths.append(({replacement:path[0]},path[1],path[2]))
+        for replacement in measure_conversion[measure]:
+            path = recursive_date_gather(comp, replacement, motion, depth+1, path_date, approx, printout)
+            # path = path_finder(path)
+            if path != None:
+                paths.append(({replacement:path[0]},path[1],path[2]))
 
     if measure in additive_conversion:
-        if measure not in used["add"]:
-            used["add"].append(measure)
+        branches = []
+        parts = []
+        if additive_conversion[measure] != []:
+            abort = False
+            for part in additive_conversion[measure]:
+                if abort == False:
+                    path = recursive_date_gather(comp, part, motion, depth+1,path_date, approx, printout) 
+                    if path == None:
+                        if part not in optional:
+                            abort = True
+                        continue
+                    else:
+                        branches.append(path)
+                        parts.append(part)
+            if not abort:
+                stuff = path_finder(branches,True)
+                if stuff:
+                    path, interval, needed = stuff
+                    if depth == 0:
+                        paths.append(({measure:{"add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
+                    else:
+                        paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))
+
+    if measure in subtract_conversion:
+        path_add = recursive_date_gather(comp,subtract_conversion[measure][0], motion, depth+1, path_date, approx, printout)
+        path_sub = recursive_date_gather(comp,subtract_conversion[measure][1], motion, depth+1, path_date, approx, printout)
+        if path_add != None and path_sub != None:
+            stuff = path_finder([path_add, path_sub], True)
+            if stuff:
+                (path_add,path_sub), interval, needed = stuff
+                if depth == 0:
+                    paths.append(({measure:{"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}}},interval, needed))
+                else:
+                    paths.append(({"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}},interval, needed))
+    if approx:
+        if measure in approximate_measure_conversion:
+            for replacement in approximate_measure_conversion[measure]:
+                path = recursive_date_gather(comp, replacement, motion, depth+1, path_date, approx, printout)
+                # path = path_finder(path)
+                if path != None:
+                    paths.append(({replacement:path[0]},path[1],path[2]))     
+        if measure in approximate_additive_conversion:
             branches = []
-            parts = []
-            if additive_conversion[measure] != []:
+            parts = []  #We need to record which parts we actuall used
+            optionals = 0 #To calc the percentage of optionals used
+            approxes, parts_needed = approximate_additive_conversion[measure]
+            if approxes != []:
                 abort = False
-                for part in additive_conversion[measure]:
+                for part in approxes:
                     if abort == False:
-                        path = recursive_date_gather(comp, part, motion, depth+1,path_date, approx, used, printout) 
-                        if path == None:
+                        path = recursive_date_gather(comp, part, motion, depth+1,path_date, approx, printout) 
+                        if path == None: #Check if start is before end path[1][0] > path[1][1]
                             if part not in optional:
                                 abort = True
+                            else:
+                                optionals+=1
                             continue
                         else:
                             branches.append(path)
                             parts.append(part)
-                if not abort:
-                    stuff = path_finder(branches,True)
-                    if stuff:
-                        path, interval, needed = stuff
-                        if depth == 0:
-                            paths.append(({measure:{"add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
-                        else:
-                            paths.append(({"add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))
-
-    if measure in subtract_conversion:
-        if measure not in used["sub"]:
-            used["sub"].append(measure)
-            path_add = recursive_date_gather(comp,subtract_conversion[measure][0], motion, depth+1, path_date, approx, used, printout)
-            path_sub = recursive_date_gather(comp,subtract_conversion[measure][1], motion, depth+1, path_date, approx, used, printout)
-            if path_add != None and path_sub != None:
-                stuff = path_finder([path_add, path_sub], True)
+            if not abort and (len(approxes)-optionals) >= parts_needed: #To prevent ridiculous approxes 
+                stuff = path_finder(branches,True)
                 if stuff:
-                    (path_add,path_sub), interval, needed = stuff
+                    path, interval, needed = stuff
                     if depth == 0:
-                        paths.append(({measure:{"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}}},interval, needed))
+                        paths.append(({measure:{"approx_add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
                     else:
-                        paths.append(({"sub":{subtract_conversion[measure][0]:path_add,subtract_conversion[measure][1]:path_sub}},interval, needed))
-    if approx:
-        if measure in approximate_measure_conversion:
-            if measure not in used["approx_conversion"]:
-                used["approx_conversion"].append(measure)
-                for replacement in approximate_measure_conversion[measure]:
-                    path = recursive_date_gather(comp, replacement, motion, depth+1, path_date, approx, used, printout)
-                    # path = path_finder(path)
-                    if path != None:
-                        paths.append(({replacement:path[0]},path[1],path[2]))     
-        if measure in approximate_additive_conversion:
-            if measure not in used["approx_add"]:
-                used["approx_add"].append(measure)
-                branches = []
-                parts = []  #We need to record which parts we actuall used
-                optionals = 0 #To calc the percentage of optionals used
-                approxes, parts_needed = approximate_additive_conversion[measure]
-                if approxes != []:
-                    abort = False
-                    for part in approxes:
-                        if abort == False:
-                            path = recursive_date_gather(comp, part, motion, depth+1,path_date, approx, used, printout) 
-                            if path == None: #Check if start is before end path[1][0] > path[1][1]
-                                if part not in optional:
-                                    abort = True
-                                else:
-                                    optionals+=1
-                                continue
-                            else:
-                                branches.append(path)
-                                parts.append(part)
-                if not abort and (len(approxes)-optionals) >= parts_needed: #To prevent ridiculous approxes 
-                    stuff = path_finder(branches,True)
-                    if stuff:
-                        path, interval, needed = stuff
-                        if depth == 0:
-                            paths.append(({measure:{"approx_add":{part:path[i] for i,part in enumerate(parts)}}}, interval, needed))
-                        else:
-                            paths.append(({"approx_add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))            
+                        paths.append(({"approx_add":{part:path[i] for i,part in enumerate(parts)}}, interval, needed))            
     if depth ==0:
         if path_date["del"] == True:
             return path_date
@@ -1165,7 +1211,11 @@ def recursive_date_gather(comp, measure, motion, depth=0, path_date=None, approx
         return None
     found_paths = path_finder(paths)
     if found_paths != None:
-        comp.measures_and_intervals[motion][measure] = found_paths[1]
+        previous = comp.measures_and_intervals[motion].get(measure, False)
+        if not previous:
+            comp.measures_and_intervals[motion][measure] = found_paths[1]
+        elif calculate_total_duration(previous) < calculate_total_duration(found_paths[1]):
+            comp.measures_and_intervals[motion][measure] = found_paths[1]
     return found_paths
 
 def get_category(sic):
@@ -1175,6 +1225,7 @@ def get_category(sic):
                 return category
     return "Uncategorized"
 
+months_dict = {1: 90, 2: 92, 3: 91, 4: 92, 5: 92, 6: 92, 7: 92, 8: 91, 9: 92, 10: 92, 11: 90, 12: 90}
 #(comp, measure, depth=0, approx = True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, printout =False, date_gather= False
 def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_approx= True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365), static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91),  lookbehind =5, annual=False):
     #Get a dataframe from the saved data of some stock 
@@ -1202,16 +1253,40 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
                 unit_dict[motion].append(unit)
         if frames_dict[motion] == []:
             break
-        df[motion] = pd.concat(frames_dict[motion], axis =1, join="outer")
+        print(f"Concatting {motion}")
+        if motion == "static":
+            df[motion] = pd.concat(frames_dict[motion], axis =1, join="outer")
+        else: #Here we account for the dates being slightly jumbled 
+            # We find the index that covers all the data
+            full_index = frames_dict[motion][0].index
+            for frame in frames_dict[motion][1:]:
+                full_index = full_index.union(frame.index)
+            errors = []
+            index = 0  # Start from the end of the list
+            gap = 1
+            #Prev things are the things previously in time but ahead in the iteration
+            while index + gap < len(full_index):  # Ensure index is within the bounds of the list
+                date = full_index[index]
+                next_date = full_index[index+gap]
+                if next_date - date < pd.Timedelta(days = months_dict[date.month] -1):  #If the dates are too close to each other
+                    errors.append(next_date)
+                    gap += 1  # Increase gap to skip further ahead
+                else:
+                    index += gap  # Move to the next item 
+                    gap = 1
+            dates_to_remove_set = set(errors)
+            new_index = pd.DatetimeIndex([date for date in full_index if date not in dates_to_remove_set]) 
+            
+            frame_list = []
+            for frame in frames_dict[motion][1:]:
+                frame = frame.reindex(new_index, method='nearest', limit=4)
+                frame_list.append(frame)
+            df[motion] = pd.concat(frame_list, axis =1, join="outer")
+
         df[motion] = df[motion][comp.extreme_start[motion]:comp.extreme_end[motion]]
-    #If units are necessary
-    # columns_multiindex = pd.MultiIndex.from_tuples([(col, unit) for col, unit in zip(df.columns, unit_list)],names=['Variable', 'Unit'])
-    # df.columns = columns_multiindex
-    #Economic indicators 
-    # indicator_frame = indicator_frame.reindex(comp.date_range)
-    # indicator_frame = indicator_frame.ffill().bfill()
-    # df = df.join(indicator_frame, how="left")
-        df[motion] = df[motion].join(comp.price, how= "left")
+        #If units are necessary
+        # columns_multiindex = pd.MultiIndex.from_tuples([(col, unit) for col, unit in zip(df.columns, unit_list)],names=['Variable', 'Unit'])
+        # df.columns = columns_multiindex
         df[motion].attrs["units"] = unit_dict[motion]
         df[motion].attrs["category"] = catg
         df[motion].attrs["missing"] = False
@@ -1283,7 +1358,7 @@ def ticker_fill(company_frames_availability):
             ticker_list.append(ticker)
     return ticker_list
 
-def get_price_column(comp, intervals=None, dividends=False):
+def get_label_columns(comp, intervals=None, dividends=False):
     if comp.foreign:
         print("Cannot use ADR for foreign companies")
         return pd.DataFrame()
@@ -1315,7 +1390,6 @@ def get_price_column(comp, intervals=None, dividends=False):
         return pd.DataFrame()
     frame.ffill(inplace=True)
     frame["MarketCap"] = frame["EntityCommonStockSharesOutstanding-0"] * comp.price["close"]
-    frame.drop(columns="EntityCommonStockSharesOutstanding-0", inplace = True)
     if dividends: #This is really kind of obsolete, ist just a fun way to get the real historical market cap
         if not comp.dividends.empty:
             comp.dividends["multiplier"] = (comp.dividends["dividend"]/comp.price["close"] + 1)
@@ -1324,4 +1398,14 @@ def get_price_column(comp, intervals=None, dividends=False):
             adjustments = pd.Series(1, index=frame.index.union(multipliers.index))  
             adjustments.loc[multipliers.index] = multipliers
             frame['MarketCap'] *= adjustments[::-1].cumprod()[::-1]
+    #Add the dividends as a feature because they always influence the price irl for some reason
+    dividends = pd.Series(0, index=frame.index.union(comp.dividends.index))  
+    if not comp.dividends.empty:
+        dividends.loc[comp.dividends["dividend"].index] = comp.dividends["dividend"]
+        frame["dividend"] = dividends
+    #Add the splits as a feture because they always influence the price irl for some reason
+    splits = pd.Series(0, index=frame.index.union(comp.splits.index))
+    if not comp.splits.empty:  
+        splits.loc[comp.splits["splitRatio"].index] = comp.splits["splitRatio"] #Here we don't include the split ratio, just that a split happened
+    frame["splits"] = splits
     return frame        

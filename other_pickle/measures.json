@@ -1,7 +1,6 @@
 {
 "static":
-    ["EntityCommonStockSharesOutstanding",
-    "AccountsPayableCurrent",
+    ["AccountsPayableCurrent",
     "AccountsReceivableNet",
     "Assets",
     "AssetsCurrent",

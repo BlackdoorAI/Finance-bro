@@ -73,7 +73,9 @@ async def yahoo_info_fetch(ticker, max_retries, start_retry_delay):
         try:
             # Access the info property directly in a thread to avoid blocking the asyncio loop
             info = await asyncio.to_thread(lambda: stock.info)
-            break  
+            if info != None:
+                break  
+            await asyncio.sleep(attempt * start_retry_delay)
         except requests.exceptions.ConnectionError as ce:
             print(f"Share yahoo connection error: {ce} {ticker}")
             await asyncio.sleep(attempt * start_retry_delay)  # Implement exponential backoff
@@ -93,6 +95,8 @@ async def yahoo_split_fetch(ticker, max_retries, start_retry_delay):
             await asyncio.sleep(attempt * start_retry_delay)  # Implement exponential backoff
         except AssertionError:
             return pd.DataFrame() #Return something where there are no splits 
+        except KeyError:
+            return pd.DataFrame() #Return something where there are no splits
         except Exception as e:
             print(f"Split yahoo error: {e} {ticker}")
             return 0  
@@ -109,9 +113,9 @@ async def yahoo_dividend_fetch(ticker, max_retries, start_retry_delay):
             await asyncio.sleep(attempt * start_retry_delay)  # Implement exponential backoff
         # except AssertionError:
         #     return pd.DataFrame() #Return something where there are no splits 
-        # except Exception as e:
-        #     print(f"Dividend yahoo error: {e} {ticker}")
-        #     return 0  
+        except Exception as e:
+            print(f"Dividend yahoo error: {e} {ticker}")
+            return 0  
     return splits
 
 

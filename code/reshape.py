@@ -12,7 +12,7 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
     #Reshapes the datapoint list so that its indexed by end and each item retains its attrs
     #Designed to be used after data is converted to datetime
     #If we have it precomputed we just use it
-    if use_precompute:
+    if use_precompute and not forced_static:
         if os.path.exists(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl"):
             with open(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl", "rb") as file:
                 trinity = pickle.load(file)
@@ -130,16 +130,21 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
                     best_part = None
                     wanted_start = wanted_end - pd.Timedelta(days=91)
                     for piece in pieces:
-                        if wanted_start- piece["start"] > -pd.Timedelta(days= 5) and  wanted_start - piece["end"] < pd.Timedelta(days= 5): # so that the interval is atleas kinda hugging the needed point
+                        if piece["start"] - pd.Timedelta(days =4) < wanted_start and wanted_end < piece["end"] + pd.Timedelta(days =4):
                             if shortest_duration > piece["dur"]:
                                 best_part = piece
                                 shortest_duration = piece["dur"]
                     if best_part != None:
-                        # print(best_part)
                         synth_val = best_part["val"]* (91 / best_part["dur"]) #Reduce the value by the interval ratio
                         connected.append({"end": wanted_end, "start": wanted_start, "val": synth_val, "filed": best_part["filed"], "special": "synth_div"})
-                        wanted_end = wanted_end + pd.Timedelta(days=91)
                         synthesised = True
+                        #Here we decide what the best value for the next wanted end is 
+                        if timediff(wanted_start,piece["start"]) < 10:
+                            wanted_end = piece["start"] + pd.Timedelta(days=182)
+                        elif timediff(wanted_end,piece["end"]) < 10: 
+                            wanted_end = piece["end"] + pd.Timedelta(days=91)
+                        else:
+                            wanted_end = wanted_end + pd.Timedelta(days=91)
 
                 if synthesised == False and missing == True:
                     connected.append({"end": wanted_end, "start": wanted_end - pd.Timedelta(days=91), "val": np.nan, "filed": pd.Timestamp(year=1993, month=1, day=1), "special":"missing"})

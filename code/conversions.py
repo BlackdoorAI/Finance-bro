@@ -28,7 +28,8 @@ measure_conversion = {"Assets":["EquityAndLiabilities", "LiabilitiesAndStockhold
                     "InterestIncome" : ["InvestmentIncomeInterest"],
                     "LongTermDebtCurrent" : ["LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths"],
                     "CapitalExpenditure" : ["PaymentsToAcquireProductiveAssets","PaymentsForCapitalImprovements"],
-                    "InventoryNet" : ["InventoryFinishedGoods"]
+                    "InventoryNet" : ["InventoryFinishedGoods"],
+                    "AccountsReceivableNetCurrent": ["AccountsAndOtherReceivablesNetCurrent"]
 }
 approximate_measure_conversion = {
                     "Liabilities":["LiabilitiesFairValueDisclosure"],
