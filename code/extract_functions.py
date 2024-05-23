@@ -1408,4 +1408,6 @@ def get_label_columns(comp, intervals=None, dividends=False):
     if not comp.splits.empty:  
         splits.loc[comp.splits["splitRatio"].index] = comp.splits["splitRatio"] #Here we don't include the split ratio, just that a split happened
     frame["splits"] = splits
+    frame["close"] = comp.price["close"]
+    frame.ffill(inplace=True)
     return frame        

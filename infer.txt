@@ -1,0 +1,19 @@
+We use three different models:
+    Static:
+        - We need to make sure the predictions are always bounded so that we only skip one report
+        - 
+
+    Dynamic:
+        - Used to having a report in the middle of the range, 1 month cushion then range up to 4 months
+        - 
+    Indicators:
+        - We predict the price in 1 month
+        - This our short term part 
+        - 
+Together:
+    Our dynamic serves as a long term predictor, static is medium and indicator short term
+    We figure out how to plug them together and train them together 
+
+
+
+The price is predicted as the 80th percentile of the price of some interval around the predicting date
