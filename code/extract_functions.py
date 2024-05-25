@@ -1399,15 +1399,15 @@ def get_label_columns(comp, intervals=None, dividends=False):
             adjustments.loc[multipliers.index] = multipliers
             frame['MarketCap'] *= adjustments[::-1].cumprod()[::-1]
     #Add the dividends as a feature because they always influence the price irl for some reason
-    dividends = pd.Series(0, index=frame.index.union(comp.dividends.index))  
+    dividends = pd.Series(0, index=frame.index.union(comp.dividends.index), dtype='float64')  
     if not comp.dividends.empty:
         dividends.loc[comp.dividends["dividend"].index] = comp.dividends["dividend"]
-        frame["dividend"] = dividends
-    #Add the splits as a feture because they always influence the price irl for some reason
-    splits = pd.Series(0, index=frame.index.union(comp.splits.index))
+    #Add the splits as a feature because they always influence the price irl for some reason
+    splits = pd.Series(1, index=frame.index.union(comp.splits.index), dtype='float64')
     if not comp.splits.empty:  
-        splits.loc[comp.splits["splitRatio"].index] = comp.splits["splitRatio"] #Here we don't include the split ratio, just that a split happened
+        splits.loc[comp.splits["splitRatio"].index] = comp.splits["splitRatio"] #Here we include the splits ratio, where there is no split there is 1 
     frame["splits"] = splits
+    frame["dividend"] = dividends
     frame["close"] = comp.price["close"]
     frame.ffill(inplace=True)
     return frame        
