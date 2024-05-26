@@ -17,3 +17,21 @@ Together:
 
 
 The price is predicted as the 80th percentile of the price of some interval around the predicting date
+
+
+Things to try tommorow:
+    Run it dry without normalization through a random LSTM 
+    Divide the quantile price by the current price or the current quantile and run through LSTM
+    Make the values multiples instead of numbers 
+    Do balancing normalization and then run through LSTM
+
+
+If we train on the price multiples, we can just give in market cap instead of shares because the model can no longer cheat 
+
+Stateless / Statefull
+    - of course its stateless, that would give it more info than it needs and it could cheat
+
+We use market cap as the size and use the multiplier of price as the label
+    -After we can divide the values by shares and then normalize 
+
+Would the LSTM pick up on changes in general and not focus on the size of the things?

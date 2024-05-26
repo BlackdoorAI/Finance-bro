@@ -50,7 +50,7 @@ approximate_measure_conversion = {
                     "ShortTermBorrowings":["LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths","LongTermDebtCurrent"],
                     "AccountsReceivableNet" :["AccountsReceivableGrossCurrent"],
                     "PaymentsToAcquireProductiveAssets": ["PaymentsToAcquirePropertyPlantAndEquipment"],
-                    "LongTermDebt" : ["LongTermDebtAndCapitalLeaseObligations"],
+                    "LongTermDebt" : ["LongTermDebtAndCapitalLeaseObligations", "LongTermDebtFairValue"],
                     "AccountsPayableCurrent": ["AccountsPayable"],
                     "InventoryNet": ["InventoryGross"],
                     "NetCashProvidedByUsedInOperatingActivities":["NetCashProvidedByUsedInOperatingActivitiesContinuingOperations"]
