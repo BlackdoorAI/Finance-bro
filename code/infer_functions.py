@@ -6,7 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 import os
 import pandas as pd
 
-def create_tensor_dataset(mode:str, lookbehind:int, limit = None, categories = 0):
+def create_tensor_dataset(mode:str, lookbehind:int, limit = None, categories = 0, averages = False):
     """
     Takes in the mode: ["static", "dynamic"]
     Returns a tensor dataset from all the merged frames
@@ -17,7 +17,10 @@ def create_tensor_dataset(mode:str, lookbehind:int, limit = None, categories = 0
     if limit == None:
         limit = len(iterator)
     atemporal_columns = ["dividend", "splits", "category", "size"]
-    label_column = f"{mode}_quantile_shifted"
+    if averages:
+        label_column = f"{mode}_average"
+    else:
+        label_column = f"{mode}_quantile"
     feature_tensor = None
     total_label_tensor = None
     total_atemporal_tensor = None
