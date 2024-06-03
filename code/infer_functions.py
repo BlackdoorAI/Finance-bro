@@ -5,6 +5,8 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import os
 import pandas as pd
+from skorch import NeuralNetClassifier, NeuralNetRegressor
+from sklearn.model_selection import GridSearchCV
 
 def create_tensor_dataset(mode:str, lookbehind:int, limit = None, categories = 0, averages = False):
     """
@@ -63,7 +65,7 @@ def create_tensor_dataset(mode:str, lookbehind:int, limit = None, categories = 0
 
     class LSTMDataset(Dataset):
         def __init__(self, features, atemporals, labels):
-            # self.features = F.normalize(features, p=1, dim=0)
+            self.features = F.normalize(features, p=1, dim=0)
             self.atemporals = atemporals
             self.labels = labels
 
@@ -76,5 +78,18 @@ def create_tensor_dataset(mode:str, lookbehind:int, limit = None, categories = 0
     dataset = LSTMDataset(feature_tensor, total_atemporal_tensor, total_label_tensor)
     return dataset
 
+def split_tensor_dataset(Dataset):
+    """
+    Splits the dataset into the x_train and y_train needed for scikit learn.
+    """
+    x = Dataset.features
+    y = Dataset.labels
+    return x, y
+
+def grid_search(Model, parameters, x_train, y_train):
+    net = NeuralNetClassifier(Model)
+    gs = GridSearchCV(net, parameters, refit=False, cv=3, scoring='accuracy')
+    gs.fit(x_train, y_train)  # Assuming X_train and y_train are your data
+    return gs, gs.best_params_
 
     
