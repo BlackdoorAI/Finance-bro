@@ -23,3 +23,7 @@ reshaped/
 clean_data/
 
 ready_data/
+
+other_pickle/Dynamic_Model.pth
+
+other_pickle/Static_Model.pth

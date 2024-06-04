@@ -35,3 +35,5 @@ We use market cap as the size and use the multiplier of price as the label
     -After we can divide the values by shares and then normalize 
 
 Would the LSTM pick up on changes in general and not focus on the size of the things?
+
+Review the training, the resets could be wrong or not happening.
