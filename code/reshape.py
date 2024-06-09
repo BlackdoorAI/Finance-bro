@@ -8,21 +8,21 @@ from conversions import *
 def timediff(a,b):
     return abs((a-b).days)
 
-def reshape(measure, datapoint_list, ticker, annual = False, approx = False, converted = False, use_precompute = True, forced_static = 0):
+def reshape(measure, datapoint_list, ticker, annual = False, approx = False, converted = False, use_precompute = True, forced_static = 0, forced_dynamic=0):
     #Reshapes the datapoint list so that its indexed by end and each item retains its attrs
     #Designed to be used after data is converted to datetime
     #If we have it precomputed we just use it
-    if use_precompute and not forced_static:
-        if os.path.exists(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl"):
-            with open(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl", "rb") as file:
-                trinity = pickle.load(file)
-                return trinity
     dynamic = True
     if "start" not in datapoint_list[0]: 
         if measure not in dynamic_fuckers:
             dynamic = False
     elif pd.isna(datapoint_list[0]["start"]):
         dynamic = False
+    if use_precompute and not forced_static and (dynamic or forced_dynamic):
+        if os.path.exists(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl"):
+            with open(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl", "rb") as file:
+                trinity = pickle.load(file)
+                return trinity
     if not converted:
         df = pd.DataFrame(datapoint_list)
         df['filed'] = pd.to_datetime(df['filed'], format='%Y-%m-%d')
@@ -30,7 +30,7 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
         if dynamic:
             df['start'] = pd.to_datetime(df['start'], format='%Y-%m-%d', errors='coerce')
         datapoint_list = df.to_dict("records")
-    if forced_static:
+    if forced_static: 
         reshaped_data = {}
         for item in datapoint_list:
             date = item["end"]
@@ -41,7 +41,56 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
                 "start": item.get("start"),
                 "filed": item["filed"],
             })
-    elif dynamic ==False:
+    elif forced_dynamic:
+        connected = []
+        wanted_end = datapoint_list[0]["end"]
+        total_end = datapoint_list[-1]["end"]
+        gaps = []
+        while(wanted_end < total_end): 
+            missing = True
+            for datapoint in datapoint_list:
+                if timediff(wanted_end,datapoint["end"]) < 10:
+                    connected.append(datapoint)
+                    wanted_end = datapoint["end"] + pd.Timedelta(days=91)
+                    missing = False
+                elif (datapoint["end"] - wanted_end).days > 370:
+                    break
+            #missing 
+            if approx:
+                best_part = None
+                useful_ends = [wanted_end]
+                for piece in datapoint_list:
+                    if piece["end"] - pd.Timedelta(days=370) < wanted_end < piece["end"] + pd.Timedelta(days =4):
+                        best_part = piece
+                        
+                if best_part != None:
+                    synth_val = best_part["val"]/4 
+                    connected.append({"end": wanted_end, "val": synth_val, "filed": best_part["filed"], "special": "synth_div"})
+                    #Here we decide what the best value for the next wanted end is 
+                    if timediff(wanted_end,piece["end"]) < 10: 
+                        wanted_end = piece["end"] + pd.Timedelta(days=91)
+                    else:
+                        wanted_end = wanted_end + pd.Timedelta(days=91)
+                    continue
+            connected.append({"end": wanted_end, "val": np.nan, "filed": pd.Timestamp(year=1993, month=1, day=1), "special":"missing"})
+            gaps.append(wanted_end)
+            wanted_end = wanted_end + pd.Timedelta(days=91)
+        reshaped_data = {}
+        for item in connected:
+            date = item["end"]
+            if date not in reshaped_data:
+                reshaped_data[date] = []
+            reshaped_data[date].append({
+                "val": item["val"],
+                # "accn": item["accn"],
+                # "fy": item["fy"],
+                # "fp": item["fp"],
+                # "form": item["form"],
+                "filed": item["filed"],
+                "special": item.get("special")
+                # "frame": item.get("frame") 
+            })
+    elif dynamic ==False: #Normal static
         reshaped_data = {}
         for item in datapoint_list:
             date = item["end"]
@@ -57,7 +106,7 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
                 # "frame": item.get("frame") 
             })
         gaps = []
-    else:
+    else: #Normal dynamic 
         if annual:
         #We need the yearly values
             connected = []

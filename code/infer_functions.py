@@ -44,7 +44,7 @@ def multiples(values_tensor):
 
     return multiples_tensor
 
-def create_tensor_dataset(mode:str, lookbehind:int, limit = None, categories = 0, verbose=False, averages = False, use_profile=False, use_multiples=False):
+def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None, categories = 0, verbose=False, averages = False, use_profile=False, use_multiples=False):
     """
     Takes in the mode: ["static", "dynamic"]
     Returns a tensor dataset from all the merged frames
@@ -79,6 +79,10 @@ def create_tensor_dataset(mode:str, lookbehind:int, limit = None, categories = 0
             frame.drop(columns=atemporal_columns+[f"range{i}" for i in range(0,categories)], inplace=True)
         else:
             frame.drop(columns=atemporal_columns+[label_column], inplace=True)
+
+        if mode == "together":
+            dynamic_columns = frame.columns[:len(measures["dynamic"])] #We assume that the dynamic data is first
+            static_columns = frame.columns[len(measures["dynamic"]):]                       
         sorted_columns = sorted(frame.columns, key=lambda x: int(x.split('-')[-1]), reverse=True) #Order the columns, we start with the last ones because LSTM
         sorted_frame = frame[sorted_columns]
         frame_tensor = torch.tensor(sorted_frame.values) #The current feature tensor 

@@ -1,7 +1,30 @@
 import pandas as pd
 import numpy as np
 from extract_functions import *
-def cleanup(companies_saved, limit=None, remove_rows=False):
+
+def adjust_dates(frame):
+    # Check if the index is a DatetimeIndex
+    if not isinstance(frame.index, pd.DatetimeIndex):
+        raise ValueError("Index must be a DatetimeIndex")
+
+    # Vectorized operation to determine if the date is before or after the 15th
+    is_before_16 = frame.index.day <= 15
+
+    # Calculate the last day of the previous month
+    end_previous_month = frame.index - pd.DateOffset(days=frame.index.day)
+
+    # Calculate the last day of the current month
+    start_next_month = pd.to_datetime(frame.index.to_period('M').astype(str)) + pd.DateOffset(months=1)
+    end_current_month = start_next_month - pd.DateOffset(days=1)
+
+    # Use numpy where to vectorize the conditional assignment
+    adjusted_dates = pd.DatetimeIndex(np.where(is_before_16, end_previous_month, end_current_month))
+
+    frame.index = adjusted_dates
+    return frame
+
+
+def cleanup(companies_saved, limit=None, remove_rows=False, tether_index=False):
     if limit == None:
         limit = len(companies_saved) 
     for ticker, availability in list(companies_saved.items())[:limit]:
@@ -17,6 +40,8 @@ def cleanup(companies_saved, limit=None, remove_rows=False):
             else:
                 mask = frame.isna().any(axis=1)
                 frame[mask] = np.nan
+            if tether_index:
+                frame = adjust_dates(frame)
             frame.to_csv(f"..\clean_data\static\{category}\{ticker}.csv")
         if availability[1]:
             frame = pd.read_csv(f"..\companies_data\dynamic\{category}\{ticker}.csv", index_col=0, parse_dates=True)
@@ -25,6 +50,8 @@ def cleanup(companies_saved, limit=None, remove_rows=False):
             else:
                 mask = frame.isna().any(axis=1)
                 frame[mask] = np.nan
+            if tether_index:
+                frame = adjust_dates(frame)
             frame.to_csv(f"..\clean_data\dynamic\{category}\{ticker}.csv")
         if availability[2]:
             frame = pd.read_csv(f"..\companies_data\price\{ticker}.csv", index_col=0, parse_dates=True)

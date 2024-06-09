@@ -411,7 +411,7 @@ class Stock:
         self.price = Price.ffill().bfill()
         return 1 
     
-    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False, forced_static=0, share_filter=0):
+    def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False, forced_static=0, share_filter=0, forced_dynamic=0):
         """  
         If date_gather, then it returns a dataframe to allow recursive_fact to get the date.
         Returns a dataframe that has rows indexed row_delta away, with lookbehind columns that are column_delta away.
@@ -447,7 +447,7 @@ class Stock:
                 approx = True
             else:
                 approx = False
-            reshaped, intervals, dynamic = reshape(measure, point_list, self.ticker, converted=False, approx=approx)
+            reshaped, intervals, dynamic = reshape(measure, point_list, self.ticker, converted=False, approx=approx, forced_dynamic=forced_dynamic)
             if intervals == []:
                 return None
             return intervals
@@ -468,7 +468,14 @@ class Stock:
             return pd.DataFrame(), None
         #Get the index dates for the datpoints for measure
         #If the measure doesn't make sense for the company's category, replace all of the datapoints with 0
-        reshaped, all_intervals, dynamic = reshape(measure, data, self.ticker, annual, reshape_approx, converted=converted, forced_static=forced_static) # _ is intervals, if the data has not been converted in the init, it will be here
+        annual_flag = False
+        for annual_measure in annual_measures:
+            if measure in measure_conversion.get(annual_measure,[]) or measure in approximate_measure_conversion.get(annual_measure,[]):
+                annual_flag = True
+                break
+        if measure in annual_measures or annual_flag:
+            reshape_approx = True        
+        reshaped, all_intervals, dynamic = reshape(measure, data, self.ticker, annual, reshape_approx, converted=converted, forced_static=forced_static, forced_dynamic=forced_dynamic) # _ is intervals, if the data has not been converted in the init, it will be here
         if intervals == None:
             intervals = all_intervals 
         if intervals == []:
@@ -540,7 +547,7 @@ class Stock:
                 column_delta = pd.Timedelta(days=95)
             tolerance = dynamic_tolerance * int(dynamic) + static_tolerance * (int(not dynamic))
             data_start = data_start - lookbehind * column_delta - pd.Timedelta(days=5) #To account for the lookbehind, it does not matter if it is way too much, it will just turn out blank and we can handle it later
-            if not dynamic: #static 
+            if not dynamic and not forced_dynamic: #static 
                 dates = list(reshaped.keys())
                 base_dates = pd.date_range(start=data_start, end=data_end, freq=row_delta) #No longer Inverted start and end to keep the correct order
                 if base_dates.empty:
@@ -565,10 +572,6 @@ class Stock:
                 unpadded_timestamps = timestamps
                 timestamps = [None] * lookbehind + timestamps #Padding
                 rows = [zip(timestamps[lookbehind:0:-1], [None]*lookbehind)] #The first few rows
-                # for i in range(lookbehind+1, index_length):
-                #     # Extract the window of n elements
-                #     window = zip(timestamps[i-lookbehind:i], [None]*lookbehind)
-                #     rows.append(window)
                 for i in range(1, index_length):
                     window = zip(timestamps[i+lookbehind:i:-1], [None]*lookbehind)
                     rows.append(window)
@@ -752,7 +755,7 @@ def operate(comp, frames, frame_names, operation, measure, dynamic, approx, appr
         starting_frame["checker"] = 0
         for frame in frames:
             frame["checker"] = 1
-            frame["checker"] = frame.apply(lambda row: 0 if row.isnull().any() else 1) #You can implement fractions
+            frame["checker"] = (~frame.isnull().any(axis=1)).astype(int) #You can implement fractions
             frame.fillna(0, inplace = True)
         if operation == "add":
             for frame, intervals in frames_and_intervals:
@@ -764,17 +767,17 @@ def operate(comp, frames, frame_names, operation, measure, dynamic, approx, appr
                     temp_frame = frame[extended_start:extended_end]
                     temp_frame.index = reasign_index
                     starting_frame = starting_frame.add(temp_frame, fill_value=0)
-            columns_to_replace = starting_frame.columns  
-            final_frame = pd.DataFrame()
+            columns_to_replace = starting_frame.columns 
+            final_frame = pd.DataFrame(index =starting_frame.index)
             for col in columns_to_replace:
                 final_frame[col] = np.where(starting_frame["checker"] >= approx_needed, starting_frame[col], np.nan) #We want to keep the gaps in the frame for addition and stuff
             # final_frame = starting_frame[starting_frame["checker"] >= approx_needed] 
-            final_frame.drop(columns=["checker"])
+            final_frame.drop(columns=["checker"], inplace=True)
             return final_frame
         else:
             print("Only add is possible with approx")
 
-def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, reshape_approx = False):
+def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, reshape_approx = False, forced_dynamic=False):
     """
     Takes in the desired path to the data and outputs the data
     New recursive_fact
@@ -785,8 +788,8 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
     # if intervals == None:
     #     intervals = (pd.Timestamp(year=1970, month=1, day=1), pd.Timestamp.now())
     for root, tree in path.items():
-        if tree == True:              
-            value, unit = comp.fact(root, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+        if tree == True:            
+            value, unit = comp.fact(root, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
             value = frame_rename(value,measure)
             return value, unit
         #Concat path
@@ -797,7 +800,7 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
             else:
                 new_intervals = get_interval
             if new_intervals != []:
-                concat_frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                concat_frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
             else:
                 concat_frame = pd.DataFrame() #We need something to add so we have a placeholder
             for sapling in tree[1:]:
@@ -808,7 +811,7 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
                         continue
                 else:
                     new_intervals = get_interval
-                frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                frame, unit = path_selector(comp, measure, {measure:fledgling}, dynamic, new_intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
                 if frame.empty:
                     continue
                 if not concat_frame.empty:
@@ -816,7 +819,7 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
                     concat_frame = concat_frame.combine_first(frame)
                 else:
                     concat_frame = frame
-            if dynamic:
+            if dynamic: #Filter the dynamic data after concatting, there could be datpoinst days apart
                 filtered_dates = []
                 last_date = None
                 for index, row in concat_frame.iterrows():
@@ -837,21 +840,21 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
             values = []
             frame_names = []
             for sprout, tree_part in tree.items():
-                add_value, unit = path_selector(comp, sprout, {sprout:tree_part}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                add_value, unit = path_selector(comp, sprout, {sprout:tree_part}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
                 values.append(add_value)
                 frame_names.append(sprout)
-            result_frame = operate(comp, values, frame_names, "add", measure, dynamic, False)
+            result_frame = operate(comp, values, frame_names, "add", measure, dynamic or forced_dynamic, False)
             result_frame = frame_rename(result_frame,measure)
             return result_frame, unit
             
         elif root == "sub":
             larch = list(tree.items())
-            add, unit = path_selector(comp, larch[0][0], {larch[0][0]:larch[0][1]}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
-            sub, unit = path_selector(comp, larch[1][0], {larch[1][0]:larch[1][1]}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            add, unit = path_selector(comp, larch[0][0], {larch[0][0]:larch[0][1]}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
+            sub, unit = path_selector(comp, larch[1][0], {larch[1][0]:larch[1][1]}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
             #Get all the possible indexes for the frame
             values = [add, sub]
             frame_names = [larch[0][0], larch[1][0]]
-            result_frame = operate(comp, values, frame_names, "sub", measure, dynamic, False)
+            result_frame = operate(comp, values, frame_names, "sub", measure, dynamic or forced_dynamic, False)
             result_frame = frame_rename(result_frame,measure)
             return result_frame,unit
         
@@ -859,13 +862,13 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
             values = []
             frame_names = []
             for sprout, tree_part in tree.items():
-                add_value, unit = path_selector(comp, sprout ,{sprout:tree_part}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                add_value, unit = path_selector(comp, sprout ,{sprout:tree_part}, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
                 #Specifically for approx
                 # add_value.fillna(0, inplace =True)
                 values.append(add_value)
                 frame_names.append(sprout)
             threshold = approximate_additive_conversion[measure][1] #Get the wanted threshold for the frames and shit
-            result_frame = operate(comp, values, frame_names, "add", measure, dynamic, True, threshold)
+            result_frame = operate(comp, values, frame_names, "add", measure, dynamic or forced_dynamic, True, threshold)
             result_frame = frame_rename(result_frame,measure)
             #Specifically for approx
             result_frame.replace(0,np.nan, inplace=True)
@@ -873,7 +876,7 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
 
         #serves as the measure conversion part
         else:
-            return path_selector(comp, root, tree, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+            return path_selector(comp, root, tree, dynamic, intervals, row_delta, column_delta, static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
 
 # Function to find overlap between two intervals
 def find_overlap(interval1, interval2):
@@ -1225,7 +1228,7 @@ def get_category(sic):
 
 months_dict = {1: 90, 2: 92, 3: 91, 4: 92, 5: 92, 6: 92, 7: 92, 8: 91, 9: 92, 10: 92, 11: 90, 12: 90}
 #(comp, measure, depth=0, approx = True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5 , annual=False, printout =False, date_gather= False
-def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_approx= True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365), static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91),  lookbehind =5, annual=False):
+def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_approx= True, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365), static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91),  lookbehind =5, annual=False, forced_dynamic=False):
     #Get a dataframe from the saved data of some stock 
     #Returns 0 in all the columns where data is missing
     comp.time_init(measures)
@@ -1245,14 +1248,17 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
                 print(f"{comp.ticker} Getting {measure}")
                 print(comp.measure_paths[motion][measure])
                 # intervals = comp.measures_and_intervals[motion][measure]
-                data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], dynamic, None, row_delta , column_delta , static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx)
+                if motion == "static": #To account for forced dynamic
+                    data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], dynamic, None, row_delta , column_delta , static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=forced_dynamic)
+                else:
+                    data, unit = path_selector(comp, measure, comp.measure_paths[motion][measure], dynamic, None, row_delta , column_delta , static_tolerance, dynamic_row_delta, dynamic_tolerance, lookbehind, annual, reshape_approx, forced_dynamic=False)
                 data.name = measure
                 frames_dict[motion].append(data)
                 unit_dict[motion].append(unit)
         if frames_dict[motion] == []:
             break
         print(f"Concatting {motion}")
-        if motion == "static":
+        if motion == "static" and not forced_dynamic:
             df[motion] = pd.concat(frames_dict[motion], axis =1, join="outer")
         else: #Here we account for the dates being slightly jumbled 
             # We find the index that covers all the data
