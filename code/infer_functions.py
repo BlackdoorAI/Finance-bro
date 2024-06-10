@@ -8,6 +8,7 @@ import os
 import pandas as pd
 from skorch import NeuralNetClassifier, NeuralNetRegressor
 from sklearn.model_selection import GridSearchCV
+import re
 
 
 def profile(values_tensor):
@@ -44,7 +45,7 @@ def multiples(values_tensor):
 
     return multiples_tensor
 
-def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None, categories = 0, verbose=False, averages = False, use_profile=False, use_multiples=False):
+def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None, categories = 0, verbose=False, averages = False, ghost=False, use_profile=False, use_multiples=False):
     """
     Takes in the mode: ["static", "dynamic"]
     Returns a tensor dataset from all the merged frames
@@ -57,6 +58,8 @@ def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None,
     atemporal_columns = ["dividend", "splits", "category", "size"]
     if averages:
         label_column = f"{mode}_average"
+    elif ghost:
+        label_column = "ghost"
     else:
         label_column = f"{mode}_quantile"
     feature_tensor = None
@@ -79,8 +82,14 @@ def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None,
             frame.drop(columns=atemporal_columns+[f"range{i}" for i in range(0,categories)], inplace=True)
         else:
             frame.drop(columns=atemporal_columns+[label_column], inplace=True)
-
-        if mode == "together":
+        #Also drop all the other shit that doesn't have a number in it now:
+        garbage_columns = []
+        for column in frame.columns:
+            if not bool(re.search(r'\d', column)):
+                garbage_columns.append(column)
+        frame.drop(columns=garbage_columns, inplace=True)
+        #Together mode where we absolutely use both dynamic and static
+        if mode == "together":  
             dynamic_columns = frame.columns[:len(measures["dynamic"])] #We assume that the dynamic data is first
             static_columns = frame.columns[len(measures["dynamic"]):]                       
         sorted_columns = sorted(frame.columns, key=lambda x: int(x.split('-')[-1]), reverse=True) #Order the columns, we start with the last ones because LSTM

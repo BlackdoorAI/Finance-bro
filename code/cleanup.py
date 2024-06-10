@@ -11,7 +11,7 @@ def adjust_dates(frame):
     is_before_16 = frame.index.day <= 15
 
     # Calculate the last day of the previous month
-    end_previous_month = frame.index - pd.DateOffset(days=frame.index.day)
+    end_previous_month = frame.index - pd.to_timedelta(frame.index.day, unit='D')
 
     # Calculate the last day of the current month
     start_next_month = pd.to_datetime(frame.index.to_period('M').astype(str)) + pd.DateOffset(months=1)
@@ -24,17 +24,23 @@ def adjust_dates(frame):
     return frame
 
 
-def cleanup(companies_saved, limit=None, remove_rows=False, tether_index=False):
+def cleanup(companies_saved, limit=None, remove_rows=False, tether_index=False, ignore_columns=[]):
     if limit == None:
         limit = len(companies_saved) 
     for ticker, availability in list(companies_saved.items())[:limit]:
-        if not (availability[0] or availability[1]) or not availability[2]: #Uninitialized
+        if not (availability[0] or availability[1]) or not availability[2] or availability == "del": #Uninitialized
             continue
         print(f"Cleaning {ticker}")
         comp = comp_load(ticker)
         category = get_category(comp.sic)
         if availability[0]:
             frame = pd.read_csv(f"..\companies_data\static\{category}\{ticker}.csv", index_col=0, parse_dates=True)
+            columns_to_drop = []
+            for dropper in ignore_columns:
+                for column in frame.columns:
+                    if dropper in column:
+                        columns_to_drop.append(column)
+            frame = frame.drop(columns=columns_to_drop)
             if remove_rows:
                 frame.dropna()
             else:
@@ -45,6 +51,12 @@ def cleanup(companies_saved, limit=None, remove_rows=False, tether_index=False):
             frame.to_csv(f"..\clean_data\static\{category}\{ticker}.csv")
         if availability[1]:
             frame = pd.read_csv(f"..\companies_data\dynamic\{category}\{ticker}.csv", index_col=0, parse_dates=True)
+            columns_to_drop = []
+            for dropper in ignore_columns:
+                for column in frame.columns:
+                    if dropper in column:
+                        columns_to_drop.append(column)
+            frame = frame.drop(columns=columns_to_drop)
             if remove_rows:
                 frame.dropna()
             else:
@@ -68,7 +80,7 @@ def quantiles(companies_saved, limit=None, quantile = 0.8, period_dict=None):
     if limit == None:
         limit = len(companies_saved)
     for ticker, availability in list(companies_saved.items())[:limit]:
-        if availability[2] and (availability[0] or availability[1]):
+        if availability[2] and (availability[0] or availability[1]) and availability != "del":
             print(f"Quantile for {ticker}")
             frame = pd.read_csv(f"..\clean_data\price\{ticker}.csv", index_col=0, parse_dates=True)
             if availability[0]:
@@ -88,7 +100,7 @@ def upper_averages(companies_saved, limit=None, quantile = 0.8, period_dict=None
     if limit == None:
         limit = len(companies_saved)
     for ticker, availability in list(companies_saved.items())[:limit]:
-        if availability[2] and (availability[0] or availability[1]):
+        if availability[2] and (availability[0] or availability[1]) and availability != "del":
             print(f"Average for {ticker}")
             frame = pd.read_csv(f"..\clean_data\price\{ticker}.csv", index_col=0, parse_dates=True)
             if availability[0]:
@@ -113,11 +125,24 @@ def upper_averages(companies_saved, limit=None, quantile = 0.8, period_dict=None
             frame['current_average'] = rolling_df.apply(lambda x: x.mean(), axis=1)
             frame.to_csv(f"..\clean_data\price\{ticker}.csv")
 
+def ghost(companies_saved, limit=None, size = 5, adjustment=0.5, iterations = 2, verbose=False):
+     for ticker, availability in list(companies_saved.items())[:limit]:
+        if availability[2] and (availability[0] or availability[1]) and availability != "del":
+            if verbose:
+                print(f"Ghost for {ticker}")
+            frame = pd.read_csv(f"..\clean_data\price\{ticker}.csv", index_col=0, parse_dates=True)
+            kernel = np.ones(size) / size
+            frame["ghost"] = frame["close"]
+            for i in range(0,iterations):
+                rolling_means = np.convolve(frame["ghost"], kernel, mode='same')
+                frame["ghost"] = 0.5 * (frame["ghost"] + rolling_means)
+            frame.to_csv(f"..\clean_data\price\{ticker}.csv")
+
 def per_share_divide(companies_saved, limit=None):
     if limit == None:
         limit = len(companies_saved)
     for ticker, availability in list(companies_saved.items())[:limit]:
-        if availability[2] and (availability[0] or availability[1]):
+        if availability[2] and (availability[0] or availability[1]) and availability != "del":
             print(f"Dividing {ticker}")
             comp = comp_load(ticker)
             category = get_category(comp.sic)
@@ -162,7 +187,7 @@ def ready_data(companies_saved, limit=None, per_share =True, dynamic_shift = pd.
         size = "EntityCommonStockSharesOutstanding-0"
     for ticker, availability in list(companies_saved.items())[:limit]:
         print(f"Readying {ticker}")
-        if availability[2] and (availability[0] or availability[1]):
+        if availability[2] and (availability[0] or availability[1]) and availability != "del":
             price_frame = pd.read_csv(f"..\clean_data\price\{ticker}.csv", index_col=0, parse_dates=True)
             comp = comp_load(ticker)
             category = get_category(comp.sic)

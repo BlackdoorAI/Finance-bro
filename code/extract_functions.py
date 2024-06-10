@@ -115,19 +115,20 @@ def closest_date(dates, target_date, ticker, fallback=False):
         # print(f"All dates are greater for {ticker}")
         return (None, None) if fallback else None
 
-def unitrun(dict, ticker, all=False, debug=False):
+def unitrun(dictionary, ticker, all=False, debug=False):
     if all:
         unit_list = all_units
     else:
         unit_list = valid_units
     for unit in unit_list:
         try:
-            return dict[unit], unit 
+            return dictionary[unit], unit 
         except KeyError:
             continue
-    if all:
-        print(f"No unit at all available for {ticker}")
-    print(f"No USD like unit available for {ticker}")
+    if all and debug:
+        print(f"No unit at all available for {ticker} : {dictionary.keys()}")
+    else:
+        print(f"No USD like unit available for {ticker} : {dictionary.keys()}")
     if debug: 
         units = []
         for key,value in dict.items():
@@ -819,7 +820,7 @@ def path_selector(comp, measure, path, dynamic, intervals = None, row_delta = pd
                     concat_frame = concat_frame.combine_first(frame)
                 else:
                     concat_frame = frame
-            if dynamic: #Filter the dynamic data after concatting, there could be datpoinst days apart
+            if dynamic or forced_dynamic: #Filter the dynamic data after concatting, there could be datpoinst days apart
                 filtered_dates = []
                 last_date = None
                 for index, row in concat_frame.iterrows():
@@ -1306,24 +1307,27 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
 async def async_task(ticker, client, semaphore_edgar, semaphore_yahoo, measures):
     # Measures are used to get the date when all the financial info is available
     print(f"Loading {ticker}")
-    stock = Stock(ticker, measures)
-    if stock.success == "del":
-        return (ticker, "del")
-    # successful_sic = await stock.async_init(client,semaphore_edgar,measures)
-    # if successful_sic == "del":
-    #     return (ticker, "del")
-    if stock.success[0] or stock.success[1]:
-        print(f"Price pinging {ticker}$")
-        succesful_price = await stock.price_init(semaphore_yahoo)
-    else:
-        succesful_price = 0
-    with open(f'..\\companies\{ticker}.pkl', 'wb') as file:
-        pickle.dump(stock,file)
-    success = stock.success
-    del stock
-    #Return (ticker, availability of data, availability of price)
-    print(f"||Done {ticker}||")
-    return (ticker, [success, succesful_price])
+    try:
+        stock = Stock(ticker, measures)
+        if stock.success == "del":
+            return (ticker, "del")
+        # successful_sic = await stock.async_init(client,semaphore_edgar,measures)
+        # if successful_sic == "del":
+        #     return (ticker, "del")
+        if stock.success[0] or stock.success[1]:
+            print(f"Price pinging {ticker}$")
+            succesful_price = await stock.price_init(semaphore_yahoo)
+        else:
+            succesful_price = 0
+        with open(f'..\\companies\{ticker}.pkl', 'wb') as file:
+            pickle.dump(stock,file)
+        success = stock.success
+        del stock
+        #Return (ticker, availability of data, availability of price)
+        print(f"||Done {ticker}||")
+        return (ticker, [success, succesful_price])
+    except Exception as e:
+        print(f"Async_task failed because: {e}")
 
 #Get the success rate for the api call
 def success_rate(availability_list):
@@ -1331,15 +1335,18 @@ def success_rate(availability_list):
     dynamic_success = 0
     yahoo_success = 0
     for i in availability_list:
-        ticker, available = i
-        if available != "del":
-            static_success += available[0][0]
-            dynamic_success += available[0][1]
-            yahoo_success += available[1]
-        else:
-            static_success += 1
-            dynamic_success += 1
-            yahoo_success += 1
+        try:
+            ticker, available = i
+            if available != "del":
+                static_success += available[0][0]
+                dynamic_success += available[0][1]
+                yahoo_success += available[1]
+            else:
+                static_success += 1
+                dynamic_success += 1
+                yahoo_success += 1
+        except Exception:
+            continue
     try:
         static_success = static_success/len(availability_list)
         dynamic_success = dynamic_success/len(availability_list)

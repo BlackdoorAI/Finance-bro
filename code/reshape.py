@@ -18,7 +18,7 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
             dynamic = False
     elif pd.isna(datapoint_list[0]["start"]):
         dynamic = False
-    if use_precompute and not forced_static and (dynamic or forced_dynamic):
+    if use_precompute and (not forced_static) and (dynamic or forced_dynamic):
         if os.path.exists(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl"):
             with open(f"C:\\Programming\\Python\\Finance\\EDGAR\\reshaped\\{ticker}\\{measure}.pkl", "rb") as file:
                 trinity = pickle.load(file)
@@ -67,8 +67,8 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
                     synth_val = best_part["val"]/4 
                     connected.append({"end": wanted_end, "val": synth_val, "filed": best_part["filed"], "special": "synth_div"})
                     #Here we decide what the best value for the next wanted end is 
-                    if timediff(wanted_end,piece["end"]) < 10: 
-                        wanted_end = piece["end"] + pd.Timedelta(days=91)
+                    if timediff(wanted_end,best_part["end"]) < 10: 
+                        wanted_end = best_part["end"] + pd.Timedelta(days=91)
                     else:
                         wanted_end = wanted_end + pd.Timedelta(days=91)
                     continue
@@ -220,14 +220,18 @@ def reshape(measure, datapoint_list, ticker, annual = False, approx = False, con
     reshaped = list(reshaped_data.items())
     interval_start = None
     i = 0
+    if reshaped == []:
+        return {}, [], dynamic
+    prev_key = reshaped[0][0]
     while(i < len(reshaped)):
         key, value = reshaped[i]
         if interval_start == None:
-            if not np.isnan(value[0]["val"]):
+            if not np.isnan(value[0]["val"]) :
                 interval_start = key
-        elif np.isnan(value[0]["val"]):
+        elif (np.isnan(value[0]["val"]) or (timediff(key,prev_key) > 100)):
             intervals.append((interval_start, reshaped[i-1][0]))
             interval_start = None
+        prev_key = key
         i+=1
     if interval_start is not None:
         intervals.append((interval_start, reshaped[-1][0]))
