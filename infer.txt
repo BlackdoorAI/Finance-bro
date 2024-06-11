@@ -37,3 +37,15 @@ We use market cap as the size and use the multiplier of price as the label
 Would the LSTM pick up on changes in general and not focus on the size of the things?
 
 Review the training, the resets could be wrong or not happening.
+
+
+
+
+
+
+Things to do:
+    Add the price changes as a feature 
+    Get all the 1000 companies 
+    Figure out what static things to drop to get more data 
+    Add the ghost calculations to ready_data
+        Extend the calculation backwards according to lookbehind to have the multiples available

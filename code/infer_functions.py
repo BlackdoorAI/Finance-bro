@@ -9,6 +9,7 @@ import pandas as pd
 from skorch import NeuralNetClassifier, NeuralNetRegressor
 from sklearn.model_selection import GridSearchCV
 import re
+import pickle
 
 
 def profile(values_tensor):
@@ -51,6 +52,12 @@ def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None,
     Returns a tensor dataset from all the merged frames
     If no limit is entered you get everything
     """
+    with open(r"..\other_pickle\ignored_columns.pkl", "rb") as file:
+        ignored_columns = pickle.load(file)
+    for mode in ["static", "dynamic"]:
+        for ignored in ignored_columns:
+            if ignored in measures[mode]:
+                measures[mode].remove(ignored)
     data_directory = f"..\\ready_data\{mode}"
     iterator = list(os.listdir(data_directory))
     if limit == None:
@@ -90,8 +97,8 @@ def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None,
         frame.drop(columns=garbage_columns, inplace=True)
         #Together mode where we absolutely use both dynamic and static
         if mode == "together":  
-            dynamic_columns = frame.columns[:len(measures["dynamic"])] #We assume that the dynamic data is first
-            static_columns = frame.columns[len(measures["dynamic"]):]                       
+            dynamic_columns = frame.columns[:len(measures["dynamic"])*lookbehind] #We assume that the dynamic data is first
+            static_columns = frame.columns[len(measures["dynamic"])*lookbehind:]                       
         sorted_columns = sorted(frame.columns, key=lambda x: int(x.split('-')[-1]), reverse=True) #Order the columns, we start with the last ones because LSTM
         sorted_frame = frame[sorted_columns]
         frame_tensor = torch.tensor(sorted_frame.values) #The current feature tensor 

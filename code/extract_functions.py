@@ -116,6 +116,8 @@ def closest_date(dates, target_date, ticker, fallback=False):
         return (None, None) if fallback else None
 
 def unitrun(dictionary, ticker, all=False, debug=False):
+    if len(dictionary) == 0:
+        return False,False
     if all:
         unit_list = all_units
     else:
@@ -206,8 +208,10 @@ def flatten(data, ticker):
         #     if gotem == False:
         #         # if "start" in datapoint_unfiltered.keys():
         #         missing_count +=1
-
-    print(f"{ticker}:{(duplicate_count/(filtered_count+duplicate_count))*100}%")
+    try:
+        print(f"{ticker}:{(duplicate_count/(filtered_count+duplicate_count))*100}%")
+    except ZeroDivisionError:
+        pass
     # print(f"{ticker}:{(1-missing_count/total_count)*100}%")
     return flat_data
 
@@ -365,6 +369,8 @@ class Stock:
             if measure in deprecate_conversion:
                 measure = deprecate_conversion[measure]
             datapoints, unit = unitrun(self.data[measure]["units"], self.ticker)
+            if datapoints == False:
+                return "del"
             for datapoint in datapoints:
                 datapoint["batch_name"] = measure  # Add identifier
                 all_data.append(datapoint)
@@ -393,24 +399,34 @@ class Stock:
     
     async def price_init(self,semaphore):
         #Get the price and set the self.price
-        self.fullprice = await yahoo_fetch(self.ticker, self.extreme_start, self.extreme_end, semaphore, RETRIES, START_RETRY_DELAY)
-        if type(self.fullprice) == int:
+        try:
+            self.fullprice = await yahoo_fetch(self.ticker, self.extreme_start, self.extreme_end, semaphore, RETRIES, START_RETRY_DELAY)
+            if type(self.fullprice) == int:
+                return 0
+            self.info = await yahoo_info_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
+            if type(self.info) == int:
+                return 0
+            splits = await yahoo_split_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
+            if type(splits) == int:
+                return 0
+            self.dividends = await yahoo_dividend_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
+            if type(self.dividends) == int:
+                return 0
+            if not splits.empty:
+                splits["splitRatio"] = splits["splitRatio"].apply(ratio_to_int)
+            self.splits = splits
+            Price = self.fullprice[["close", "adjclose"]].copy()
+            self.price = Price.ffill().bfill()
+            return 1 
+        except asyncio.TimeoutError as ex:
+            print(f"Timeout: {ex}")
             return 0
-        self.info = await yahoo_info_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
-        if type(self.info) == int:
+        except asyncio.CancelledError as ex:
+            print(f"Canceled: {ex}")
             return 0
-        splits = await yahoo_split_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
-        if type(splits) == int:
+        except Exception as e:
+            print(f"price init {e}")
             return 0
-        self.dividends = await yahoo_dividend_fetch(self.ticker, RETRIES, START_RETRY_DELAY)
-        if type(self.dividends) == int:
-            return 0
-        if not splits.empty:
-            splits["splitRatio"] = splits["splitRatio"].apply(ratio_to_int)
-        self.splits = splits
-        Price = self.fullprice[["close", "adjclose"]].copy()
-        self.price = Price.ffill().bfill()
-        return 1 
     
     def fact(self, measure, intervals = None, row_delta = pd.Timedelta(days=1), column_delta = pd.Timedelta(days=365),static_tolerance=pd.Timedelta(days =0), dynamic_row_delta=pd.Timedelta(days=1), dynamic_tolerance=pd.Timedelta(days=91), lookbehind =5, annual=False, reshape_approx=False, date_gather=False, forced_static=0, share_filter=0, forced_dynamic=0):
         """  
@@ -1316,7 +1332,7 @@ async def async_task(ticker, client, semaphore_edgar, semaphore_yahoo, measures)
         #     return (ticker, "del")
         if stock.success[0] or stock.success[1]:
             print(f"Price pinging {ticker}$")
-            succesful_price = await stock.price_init(semaphore_yahoo)
+            succesful_price = await asyncio.wait_for(stock.price_init(semaphore_yahoo), timeout=500)
         else:
             succesful_price = 0
         with open(f'..\\companies\{ticker}.pkl', 'wb') as file:
@@ -1324,11 +1340,21 @@ async def async_task(ticker, client, semaphore_edgar, semaphore_yahoo, measures)
         success = stock.success
         del stock
         #Return (ticker, availability of data, availability of price)
-        print(f"||Done {ticker}||")
+        print(f"||Done {ticker}|| = {success}")
         return (ticker, [success, succesful_price])
+    except asyncio.TimeoutError as ex:
+        print(f"Timeout {ex}")
+        return (ticker, [(0,0),0])
+    except asyncio.CancelledError as ex:
+        print(f"Canceled {ex}")
+        return (ticker, [(0,0),0])
+    # except BaseException as e:
+    #     print(f"||Done {ticker}|| = {success}")
+    #     return (ticker, [(0,0),0])
     except Exception as e:
         print(f"Async_task failed because: {e}")
-
+        print(f"||Done {ticker}|| = {success}")
+        return (ticker, [(0,0),0])
 #Get the success rate for the api call
 def success_rate(availability_list):
     static_success = 0

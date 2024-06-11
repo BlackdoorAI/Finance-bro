@@ -8,7 +8,7 @@ def adjust_dates(frame):
         raise ValueError("Index must be a DatetimeIndex")
 
     # Vectorized operation to determine if the date is before or after the 15th
-    is_before_16 = frame.index.day <= 15
+    is_before_16 = frame.index.day <= 6
 
     # Calculate the last day of the previous month
     end_previous_month = frame.index - pd.to_timedelta(frame.index.day, unit='D')
@@ -28,12 +28,12 @@ def cleanup(companies_saved, limit=None, remove_rows=False, tether_index=False, 
     if limit == None:
         limit = len(companies_saved) 
     for ticker, availability in list(companies_saved.items())[:limit]:
-        if not (availability[0] or availability[1]) or not availability[2] or availability == "del": #Uninitialized
+        if not availability[2] or availability == "del": #Uninitialized
             continue
         print(f"Cleaning {ticker}")
         comp = comp_load(ticker)
         category = get_category(comp.sic)
-        if availability[0]:
+        if os.path.exists(f"..\companies_data\static\{category}\{ticker}.csv"):
             frame = pd.read_csv(f"..\companies_data\static\{category}\{ticker}.csv", index_col=0, parse_dates=True)
             columns_to_drop = []
             for dropper in ignore_columns:
@@ -49,7 +49,7 @@ def cleanup(companies_saved, limit=None, remove_rows=False, tether_index=False, 
             if tether_index:
                 frame = adjust_dates(frame)
             frame.to_csv(f"..\clean_data\static\{category}\{ticker}.csv")
-        if availability[1]:
+        if os.path.exists(f"..\companies_data\dynamic\{category}\{ticker}.csv"):
             frame = pd.read_csv(f"..\companies_data\dynamic\{category}\{ticker}.csv", index_col=0, parse_dates=True)
             columns_to_drop = []
             for dropper in ignore_columns:
@@ -67,11 +67,11 @@ def cleanup(companies_saved, limit=None, remove_rows=False, tether_index=False, 
             frame.to_csv(f"..\clean_data\dynamic\{category}\{ticker}.csv")
         if availability[2]:
             frame = pd.read_csv(f"..\companies_data\price\{ticker}.csv", index_col=0, parse_dates=True)
-            if remove_rows:
-                frame.dropna()
-            else:
-                mask = frame.isna().any(axis=1)
-                frame[mask] = np.nan
+            # if remove_rows:
+            #     frame.dropna()
+            # else:
+            #     mask = frame.isna().any(axis=1)
+            #     frame[mask] = np.nan
             frame.to_csv(f"..\clean_data\price\{ticker}.csv")
 
 def quantiles(companies_saved, limit=None, quantile = 0.8, period_dict=None):
@@ -127,7 +127,7 @@ def upper_averages(companies_saved, limit=None, quantile = 0.8, period_dict=None
 
 def ghost(companies_saved, limit=None, size = 5, adjustment=0.5, iterations = 2, verbose=False):
      for ticker, availability in list(companies_saved.items())[:limit]:
-        if availability[2] and (availability[0] or availability[1]) and availability != "del":
+        if os.path.exists(f"..\clean_data\price\{ticker}.csv") and availability != "del":
             if verbose:
                 print(f"Ghost for {ticker}")
             frame = pd.read_csv(f"..\clean_data\price\{ticker}.csv", index_col=0, parse_dates=True)
@@ -142,17 +142,18 @@ def per_share_divide(companies_saved, limit=None):
     if limit == None:
         limit = len(companies_saved)
     for ticker, availability in list(companies_saved.items())[:limit]:
-        if availability[2] and (availability[0] or availability[1]) and availability != "del":
+        if os.path.exists(f"..\clean_data\price\{ticker}.csv") and availability != "del":
             print(f"Dividing {ticker}")
             comp = comp_load(ticker)
             category = get_category(comp.sic)
             price_frame = pd.read_csv(f"..\clean_data\price\{ticker}.csv", index_col=0, parse_dates=True)
             shares = price_frame["EntityCommonStockSharesOutstanding-0"].replace(0, pd.NA)
-            if availability[0]:
+            if os.path.exists(f"..\clean_data\static\{category}\{ticker}.csv"):
                 frame = pd.read_csv(f"..\clean_data\static\{category}\{ticker}.csv", index_col=0, parse_dates=True)
+                shares = shares.reindex(frame.index)
                 frame = frame.divide(shares, axis=0)
                 frame.to_csv(f"..\clean_data\per_share\static\{category}\{ticker}.csv")
-            if availability[1]:
+            if os.path.exists(f"..\clean_data\dynamic\{category}\{ticker}.csv"):
                 frame = pd.read_csv(f"..\clean_data\dynamic\{category}\{ticker}.csv", index_col=0, parse_dates=True)
                 shares = shares.reindex(frame.index)
                 frame = frame.divide(shares, axis=0)
@@ -172,7 +173,7 @@ def categorize(frame, categories, label_name):
     frame = frame.drop(columns=[label_name])
     return frame
 
-def ready_data(companies_saved, limit=None, per_share =True, dynamic_shift = pd.Timedelta(days=0), static_shift = pd.Timedelta(days=0), multiples=False, marketcap= True, categories = False, averages=False):
+def ready_data(companies_saved, limit=None, per_share =True, dynamic_shift = pd.Timedelta(days=0), static_shift = pd.Timedelta(days=0), multiples=False, marketcap= True, categories = False, averages=False, ghost=True):
     if limit == None:
         limit = len(companies_saved) 
     with open("..\categories\category_conversion.json", "r") as file:
@@ -212,34 +213,51 @@ def ready_data(companies_saved, limit=None, per_share =True, dynamic_shift = pd.
                         price_frame[label] = quant_frame.divide(price_frame["current_average" if averages else "current_quantile"], axis=0) -1
                     else:
                         price_frame[label] = quant_frame 
-            price_frame.drop(columns=dropper, inplace=True)
+            real_dropper = []
+            for column in dropper:
+                if column in price_frame.columns:
+                    real_dropper.append(column)
+            price_frame.drop(columns=real_dropper, inplace=True)
             #Add the category as a feature
             price_frame["category"] = cat_feature 
-            if availability[0]:
-                static_frame = pd.read_csv(f"..\clean_data{per_share}\static\{category}\{ticker}.csv", index_col=0, parse_dates=True)
-                #Concat labels and features
-                static_frame = pd.concat([static_frame,price_frame.reindex(static_frame.index)], axis=1)
-                static_frame.dropna(inplace=True)
-                if "dynamic_quantile" in price_frame.columns:
-                    static_frame.drop(columns=["dynamic_quantile"],inplace =True)
-                if "dynamic_average" in price_frame.columns:
-                    static_frame.drop(columns=["dynamic_average"],inplace =True)
-                #Categorize if wanted
-                if categories:
-                    static_frame = categorize(static_frame,[(-1,-0.5), (-0.5, 0), (0,0.1), (0.1,0.2), (0.2,0.3), (0.4,0.5), (0.5,1)], "static_average" if averages else "static_quantile" )
-                static_frame.to_csv(f"..\\ready_data\static\{ticker}.csv")
-            if availability[1]:
-                dynamic_frame = pd.read_csv(f"..\clean_data{per_share}\dynamic\{category}\{ticker}.csv", index_col=0, parse_dates=True)
-                #Concat the labels and features
-                dynamic_frame = pd.concat([dynamic_frame,price_frame.reindex(dynamic_frame.index)], axis=1)
-                dynamic_frame.dropna(inplace=True)
-                if "static_quantile" in price_frame.columns:
-                    dynamic_frame.drop(columns=["static_quantile"],inplace =True)
-                if "static_average" in price_frame.columns:
-                    dynamic_frame.drop(columns=["static_average"],inplace =True)
-                if categories:
-                    dynamic_frame = categorize(dynamic_frame,[(-1,-0.5), (-0.5, 0), (0,0.1), (0.1,0.2), (0.2,0.3), (0.4,0.5), (0.5,1)], "dynamic_average" if averages else "dynamic_quantile")
-                dynamic_frame.to_csv(f"..\\ready_data\dynamic\{ticker}.csv")
-            if availability[0] and availability[1]:
+            if not ghost:
+                if availability[0]:
+                    static_frame = pd.read_csv(f"..\clean_data{per_share}\static\{category}\{ticker}.csv", index_col=0, parse_dates=True)
+                    #Concat labels and features
+                    static_frame = pd.concat([static_frame,price_frame.reindex(static_frame.index)], axis=1)
+                    static_frame.dropna(inplace=True)
+                    for lable_variant in ["dynamic_quantile", "dynamic_average"]:
+                        if lable_variant in price_frame.columns:
+                            static_frame.drop(columns=[lable_variant],inplace =True)
+                    #Categorize if wanted
+                    if categories:
+                        static_frame = categorize(static_frame,[(-1,-0.5), (-0.5, 0), (0,0.1), (0.1,0.2), (0.2,0.3), (0.4,0.5), (0.5,1)], "static_average" if averages else "static_quantile" )
+                    static_frame.to_csv(f"..\\ready_data\static\{ticker}.csv")
+                if availability[1]:
+                    dynamic_frame = pd.read_csv(f"..\clean_data{per_share}\dynamic\{category}\{ticker}.csv", index_col=0, parse_dates=True)
+                    #Concat the labels and features
+                    dynamic_frame = pd.concat([dynamic_frame,price_frame.reindex(dynamic_frame.index)], axis=1)
+                    dynamic_frame.dropna(inplace=True)
+                    for lable_variant in ["static_quantile", "static_average"]:
+                        if lable_variant in price_frame.columns:
+                            static_frame.drop(columns=[lable_variant],inplace =True)
+                    if categories:
+                        dynamic_frame = categorize(dynamic_frame,[(-1,-0.5), (-0.5, 0), (0,0.1), (0.1,0.2), (0.2,0.3), (0.4,0.5), (0.5,1)], "dynamic_average" if averages else "dynamic_quantile")
+                    dynamic_frame.to_csv(f"..\\ready_data\dynamic\{ticker}.csv")
+            if os.path.exists(f"..\clean_data{per_share}\static\{category}\{ticker}.csv") and os.path.exists(f"..\clean_data{per_share}\dynamic\{category}\{ticker}.csv"):
+                if ghost:
+                    static_frame = pd.read_csv(f"..\clean_data{per_share}\static\{category}\{ticker}.csv", index_col=0, parse_dates=True)
+                    dynamic_frame = pd.read_csv(f"..\clean_data{per_share}\dynamic\{category}\{ticker}.csv", index_col=0, parse_dates=True)
                 total_frame = pd.concat([static_frame,dynamic_frame], axis=1)
-                total_frame.to_csv(f"..\\ready_data\\together\{ticker}.csv")
+                if ghost:
+                    for lable_variant in ["static_quantile", "static_average", "dynamic_quantile", "dynamic_average"]:
+                        if lable_variant in price_frame.columns:
+                            static_frame.drop(columns=[lable_variant],inplace =True)
+                    special_index = total_frame.index.intersection(price_frame.index)
+                    reduced_price = price_frame.loc[special_index]
+                    total_frame.dropna(inplace=True)
+                    total_frame["price_ratio"] = reduced_price['ghost'] / reduced_price['ghost'].shift(1)
+                    total_frame["price_ratio"].iloc[0] = 1
+                    total_frame.dropna(inplace=True)
+                if not total_frame.empty:
+                    total_frame.to_csv(f"..\\ready_data\\together\{ticker}.csv")
