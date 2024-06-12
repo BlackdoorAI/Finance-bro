@@ -46,7 +46,7 @@ def multiples(values_tensor):
 
     return multiples_tensor
 
-def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None, categories = 0, verbose=False, averages = False, ghost=False, use_profile=False, use_multiples=False):
+def create_tensor_dataset(Mode:str, lookbehind:int, measures:dict, limit = None, categories = 0, verbose=False, averages = False, ghost=False, use_profile=False, use_multiples=False, use_atemporal=False):
     """
     Takes in the mode: ["static", "dynamic"]
     Returns a tensor dataset from all the merged frames
@@ -58,15 +58,18 @@ def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None,
         for ignored in ignored_columns:
             if ignored in measures[mode]:
                 measures[mode].remove(ignored)
-    data_directory = f"..\\ready_data\{mode}"
+    data_directory = f"..\\ready_data\{Mode}"
     iterator = list(os.listdir(data_directory))
     if limit == None:
         limit = len(iterator)
-    atemporal_columns = ["dividend", "splits", "category", "size"]
+    if use_atemporal:
+        atemporal_columns = ["dividend", "splits", "category", "size"]
+    else:
+        atemporal_columns = []
     if averages:
         label_column = f"{mode}_average"
     elif ghost:
-        label_column = "ghost"
+        label_column = "ghost_label"
     else:
         label_column = f"{mode}_quantile"
     feature_tensor = None
@@ -96,20 +99,59 @@ def create_tensor_dataset(mode:str, lookbehind:int, measures:dict, limit = None,
                 garbage_columns.append(column)
         frame.drop(columns=garbage_columns, inplace=True)
         #Together mode where we absolutely use both dynamic and static
-        if mode == "together":  
-            dynamic_columns = frame.columns[:len(measures["dynamic"])*lookbehind] #We assume that the dynamic data is first
-            static_columns = frame.columns[len(measures["dynamic"])*lookbehind:]                       
-        sorted_columns = sorted(frame.columns, key=lambda x: int(x.split('-')[-1]), reverse=True) #Order the columns, we start with the last ones because LSTM
-        sorted_frame = frame[sorted_columns]
-        frame_tensor = torch.tensor(sorted_frame.values) #The current feature tensor 
-        frame_tensor = frame_tensor.view(-1,lookbehind, len(sorted_frame.columns)//lookbehind) #shape before = (rows, columns) | shape after = (rows, lookbehind, columns/lookbehind)
-        if use_profile: #Get a stat profile for each timestamp 
-            profile_tensor = profile(frame_tensor)
-        #Two ways to kind of normalize the data
-        if use_multiples:
-            frame_tensor = multiples(frame_tensor)
+        if Mode == "together":  
+            static_columns = frame.columns[:len(measures["static"])*lookbehind] #We assume that the static data is first
+            dynamic_columns = frame.columns[len(measures["static"])*lookbehind:(len(measures["dynamic"]) + len(measures["static"]))*lookbehind]
+            #Static
+            static_frame = frame.loc[:,static_columns]
+            sorted_columns = sorted(static_frame.columns, key=lambda x: int(x.split('-')[-1]), reverse=True) #Order the columns, we start with the last ones because LSTM
+            sorted_frame = frame[sorted_columns]
+            static_frame_tensor = torch.tensor(sorted_frame.values) #The current feature tensor 
+            static_frame_tensor = static_frame_tensor.view(-1,lookbehind, len(sorted_frame.columns)//lookbehind)
+            static_tensor = multiples(static_frame_tensor)
+            #Dynamic
+            dynamic_frame = frame.loc[:,dynamic_columns]
+            sorted_columns = sorted(dynamic_frame.columns, key=lambda x: int(x.split('-')[-1]), reverse=True) #Order the columns, we start with the last ones because LSTM
+            sorted_frame = frame[sorted_columns]
+            dynamic_frame_tensor = torch.tensor(sorted_frame.values) #The current feature tensor 
+            dynamic_frame_tensor = dynamic_frame_tensor.view(-1,lookbehind, len(sorted_frame.columns)//lookbehind)
+            dynamic_tensor = F.normalize(dynamic_frame_tensor, p=1, dim=1)
+
+            if ghost:
+                ghost_columns = frame.columns[(len(measures["dynamic"]) + len(measures["static"]))*lookbehind:]
+                ghost_frame = frame.loc[:,ghost_columns]
+                ghost_tensor = torch.tensor(ghost_frame.values)
+                ghost_tensor = ghost_tensor.view(-1,lookbehind, len(ghost_frame.columns)//lookbehind)
+                if use_profile:
+                    combined_tensor = torch.cat([static_tensor, dynamic_tensor], dim=2)
+                    profile_tensor = profile(combined_tensor)
+                frame_tensor =  torch.cat([static_tensor, dynamic_tensor, ghost_tensor], dim=2)
+            else:
+                frame_tensor = torch.cat([static_tensor, dynamic_tensor], dim=2)
+                if use_profile:
+                    profile_tensor = profile(frame_tensor)
         else:
-            frame_tensor = F.normalize(frame_tensor, p=1, dim=1)
+            sorted_columns = sorted(frame.columns, key=lambda x: int(x.split('-')[-1]), reverse=True) #Order the columns, we start with the last ones because LSTM
+            sorted_frame = frame[sorted_columns]
+            frame_tensor = torch.tensor(sorted_frame.values) #The current feature tensor 
+            frame_tensor = frame_tensor.view(-1,lookbehind, len(sorted_frame.columns)//lookbehind) #shape before = (rows, columns) | shape after = (rows, lookbehind, columns/lookbehind)
+            if use_profile: #Get a stat profile for each timestamp 
+                # if ghost:
+                #     for i in range(0,lookbehind):
+                #         if f"ghost_shifted-{i}" in sorted_columns:
+                #             sorted_columns.remove(f"ghost_shifted-{i}")
+                #     profile_sorted_frame = frame[sorted_columns]
+                #     profile_frame_tensor = torch.tensor(profile_sorted_frame.values) #The current feature tensor 
+                #     profile_frame_tensor = profile_frame_tensor.view(-1,lookbehind, len(profile_sorted_frame.columns)//lookbehind) 
+                #     profile_tensor = profile(profile_frame_tensor)
+                # else:
+                profile_tensor = profile(frame_tensor)
+            if not ghost:
+                #Two ways to kind of normalize the data
+                if use_multiples:
+                    frame_tensor = multiples(frame_tensor)
+                else:
+                    frame_tensor = F.normalize(frame_tensor, p=1, dim=1)
         if use_profile: #If the profile was used just a little bit more data
             frame_tensor = torch.cat((frame_tensor, profile_tensor), dim=2)
         if feature_tensor != None: #Feauture tensor is the total tensor 
@@ -180,9 +222,9 @@ class Conditional_Hook:
 def objective(trial, Model_Class, x_train, y_train, categories):
     # Define the parameters to search
     model_params = {
-        'hidden_dim': trial.suggest_int('hidden_dim', 100, 300),
-        'layers': trial.suggest_int('layers', 2, 3),
-        'batch_size': trial.suggest_categorical('batch_size', [16, 32]),
+        'hidden_dim': trial.suggest_int('hidden_dim', 100, 500),
+        'layers': trial.suggest_int('layers', 2, 4),
+        'batch_size': trial.suggest_categorical('batch_size', [16, 32, 48, 64]),
         "input" : x_train.shape[2],
         'categories': categories  # Just to pass it through
     }

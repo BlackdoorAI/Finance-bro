@@ -173,7 +173,7 @@ def categorize(frame, categories, label_name):
     frame = frame.drop(columns=[label_name])
     return frame
 
-def ready_data(companies_saved, limit=None, per_share =True, dynamic_shift = pd.Timedelta(days=0), static_shift = pd.Timedelta(days=0), multiples=False, marketcap= True, categories = False, averages=False, ghost=True):
+def ready_data(companies_saved, limit=None, lookbehind = 6, per_share =True, dynamic_shift = pd.Timedelta(days=0), static_shift = pd.Timedelta(days=0), multiples=False, marketcap= True, categories = False, averages=False, ghost=True):
     if limit == None:
         limit = len(companies_saved) 
     with open("..\categories\category_conversion.json", "r") as file:
@@ -253,11 +253,15 @@ def ready_data(companies_saved, limit=None, per_share =True, dynamic_shift = pd.
                     for lable_variant in ["static_quantile", "static_average", "dynamic_quantile", "dynamic_average"]:
                         if lable_variant in price_frame.columns:
                             static_frame.drop(columns=[lable_variant],inplace =True)
-                    special_index = total_frame.index.intersection(price_frame.index)
+                    sparse_index = pd.date_range(start=total_frame.index[0] - pd.DateOffset(years=math.ceil(lookbehind/4)), end=total_frame.index[-1] + pd.DateOffset(years=1), freq='Q')
+                    special_index = sparse_index.intersection(price_frame.index)
                     reduced_price = price_frame.loc[special_index]
                     total_frame.dropna(inplace=True)
-                    total_frame["price_ratio"] = reduced_price['ghost'] / reduced_price['ghost'].shift(1)
-                    total_frame["price_ratio"].iloc[0] = 1
+                    ghost_shift_series = reduced_price['ghost'] / reduced_price['ghost'].shift(1)
+                    ghost_shift_series.iloc[0] = 1
+                    for i in range(0,lookbehind):
+                        total_frame[f"ghost_shift-{i}"] = ghost_shift_series.shift(i)
+                    total_frame["ghost_label"] = ghost_shift_series.shift(-1)
                     total_frame.dropna(inplace=True)
                 if not total_frame.empty:
                     total_frame.to_csv(f"..\\ready_data\\together\{ticker}.csv")

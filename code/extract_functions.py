@@ -1289,7 +1289,7 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
             while index + gap < len(full_index):  # Ensure index is within the bounds of the list
                 date = full_index[index]
                 next_date = full_index[index+gap]
-                if next_date - date < pd.Timedelta(days = months_dict[date.month] -1):  #If the dates are too close to each other
+                if next_date - date < pd.Timedelta(days = months_dict[date.month] -4):  #If the dates are too close to each other
                     errors.append(next_date)
                     gap += 1  # Increase gap to skip further ahead
                 else:
@@ -1300,7 +1300,7 @@ def acquire_frame(comp, measures:dict, available, indicator_frame, reshape_appro
             
             frame_list = []
             for frame in frames_dict[motion]:
-                frame = frame.reindex(new_index, method='nearest', limit=6)
+                frame = frame.reindex(new_index, method='nearest', limit=10)
                 frame_list.append(frame)
             if frame_list != []:
                 df[motion] = pd.concat(frame_list, axis =1, join="outer")
@@ -1395,6 +1395,7 @@ def ticker_fill(company_frames_availability):
             continue
         else:
             ticker_list.append(ticker)
+    print(f"Calling {len(ticker_list)} companies")
     return ticker_list
 
 def get_label_columns(comp, intervals=None, dividends=False):
