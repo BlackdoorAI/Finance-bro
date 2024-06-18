@@ -12,6 +12,8 @@ units-checkout/
 
 frames/
 
+infer.txt
+
 extract.txt
 
 goodwill.txt
@@ -22,8 +24,12 @@ reshaped/
 
 clean_data/
 
+submissions.ipynb
+
 ready_data/
 
 other_pickle/Dynamic_Model.pth
 
 other_pickle/Static_Model.pth
+
+C:\Programming\Python\Finance\EDGAR\code\jakub.ipynb

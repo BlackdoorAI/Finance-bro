@@ -327,3 +327,38 @@ class DynamicLSTM(nn.Module):
                        torch.zeros(self.layers_num,batch_size,self.hidden_dim))
     def flatten_parameters(self):
         self.lstm.flatten_parameters()
+
+class StaticLSTM(nn.Module):
+
+    def __init__(self, hidden_dim, batch_size, layers, input, categories=0):
+        super(StaticLSTM, self).__init__()
+
+        self.hidden_dim = hidden_dim
+        self.batch_size = batch_size
+        self.layers_num = layers
+        
+        #input is all the embedding vectors plus all the other variables
+        self.lstm = nn.LSTM(input, hidden_dim, num_layers=layers, batch_first=True) 
+        self.hidden = (torch.zeros(layers,batch_size,hidden_dim),torch.zeros(layers,batch_size,hidden_dim))
+        
+        #Squeeeze them into 1 dimension
+        if categories > 0:
+            self.hidden2label = nn.Linear(hidden_dim, categories)
+        else:
+            self.hidden2label = nn.Linear(hidden_dim, 1)
+
+    def forward(self, batch_tensor):
+        lstm_out, self.hidden = self.lstm(batch_tensor)
+        last_timestep_output = lstm_out[:, -1, :]
+        sales = self.hidden2label(last_timestep_output)
+        return sales
+    
+    def hidden_reset(self):
+        #reset the hidden and cell state after each epoch
+        self.hidden = (torch.zeros(self.layers_num,self.batch_size,self.hidden_dim),
+                       torch.zeros(self.layers_num,self.batch_size,self.hidden_dim))
+    def batch_reset(self,batch_size):
+        self.hidden = (torch.zeros(self.layers_num,batch_size,self.hidden_dim),
+                       torch.zeros(self.layers_num,batch_size,self.hidden_dim))
+    def flatten_parameters(self):
+        self.lstm.flatten_parameters()
