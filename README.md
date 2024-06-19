@@ -2,7 +2,7 @@
 
 Stockstat is an application designed to simplify company analysis and investing for beginners. By providing user-friendly tools and insights, Stockstat aims to empower those new to the investing world to make informed decisions and build their investment portfolios with confidence.
 
-## Usage
+## Purpose
 
 This project is a hybrid. It is centered around cleaning, parsing, and filling in missing entries in the EDGAR dataset. In one part, the data is used to train a prediction model, and in the second part, it helps with backtesting investment strategies.
 
@@ -43,6 +43,7 @@ In order to run the code, please download the bulk filing and submissions data f
 ### `utils.ipynb`
 - **Purpose**: Aids in miscellaneous testing and utilities.
 - **Functionality**: Provides various utility functions and testing tools for development use.
+
 
 ## Active Development Phase
 
