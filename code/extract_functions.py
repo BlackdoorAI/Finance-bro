@@ -478,7 +478,7 @@ class Stock:
             frame.fillna(0,inplace = True)
             return frame, "ignored"
         elif measure in self.data:
-            data = self.data[measure]
+            data = unitrun(self.data[measure]["units"], self.ticker)
             converted = False
         else:
             # print(f"{self.ticker}: Data not converted or available for {measure}")

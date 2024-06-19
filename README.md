@@ -6,6 +6,12 @@ Stockstat is an application designed to simplify company analysis and investing 
 
 This project is a hybrid. It is centered around cleaning, parsing, and filling in missing entries in the EDGAR dataset. In one part, the data is used to train a prediction model, and in the second part, it helps with backtesting investment strategies.
 
+## Requirements
+
+In order to run the code, please download the bulk filing and submissions data from the sec.gov website:
+    [companyfacts](https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip)
+    [submisssions](https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip)
+
 ## Files Description
 
 ### `extract.ipynb`
